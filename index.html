@@ -1,0 +1,1632 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="cache-control" content="no-store">
+<title>Barbarzyńcy u Bram — prototyp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Special+Elite&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2b2117; --ink2:#5a4a35; --red:#8f2d22; --gold:#b8860b;
+  --paper:#efe4cf; --paper2:#e6d7b8; --paper3:#f6efdd;
+  --rome:#7a1f1f; --goth:#2f5f3a; --vandal:#3a2a55; --gaul:#1f4d6b; --neutral:#8a8070;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;font-family:'Special Elite',serif;color:var(--ink);
+  background:#3a3226;}
+#table{position:fixed;inset:0;background:#f5f3ee;overflow:hidden;}
+#links{position:absolute;inset:0;pointer-events:none;z-index:1;}
+/* stos kart w środku stołu */
+#deck{position:absolute;left:45%;top:38%;z-index:2;width:76px;height:102px;}
+#deck .dcard{position:absolute;inset:0;border-radius:7px;border:2px solid #7a2d22;
+  background:repeating-linear-gradient(45deg,#8a3527 0 9px,#7a2d22 9px 18px);
+  box-shadow:2px 3px 5px rgba(0,0,0,.28);}
+#deck .d3{transform:rotate(-4deg) translate(-3px,2px)}
+#deck .d2{transform:rotate(3deg) translate(2px,-1px)}
+#deck .d1{transform:rotate(-1deg);display:flex;align-items:center;justify-content:center;
+  font-family:'IM Fell English SC';color:#f2e2c0;font-size:15px;text-align:center;line-height:1.1;letter-spacing:1px}
+#chaosdeck{position:absolute;left:44%;top:34%;z-index:2;}
+
+/* provinces — format karty pionowej, fill per region */
+.prov{position:absolute;width:80px;height:106px;z-index:3;cursor:default;
+  background:var(--paper);border:2px solid #b7a57e;border-radius:6px;padding:5px 6px 5px;
+  box-shadow:2px 3px 0 rgba(60,45,25,.24), inset 0 0 24px rgba(120,90,50,.10);
+  transform:rotate(var(--rot,0deg));transition:box-shadow .12s,transform .12s;
+  display:flex;flex-direction:column;}
+.prov.r-zachod{background:#e6ecd6;border-color:#8f9d64}
+.prov.r-srodek{background:#d9e3ec;border-color:#7a94a4}
+.prov.r-poludnie{background:#f0dcc2;border-color:#c0905f}
+.prov.r-wschod{background:#e7dcea;border-color:#977ba4}
+.prov .rband{height:5px;border-radius:3px;margin:-1px -2px 4px;box-shadow:inset 0 -1px 2px rgba(0,0,0,.15)}
+.prov.r-zachod .rband{background:#8f9d64}
+.prov.r-srodek .rband{background:#7a94a4}
+.prov.r-poludnie .rband{background:#c0905f}
+.prov.r-wschod .rband{background:#977ba4}
+.prov:before{content:"";position:absolute;inset:0;border-radius:5px;pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,.28),transparent 42%);}
+.prov .pname{font-family:'IM Fell English SC',serif;font-size:12px;letter-spacing:.2px;line-height:1;margin-bottom:1px;}
+.prov .rlabel{display:none}
+.prov .pmid{flex:1}
+.prov .pdef{font-size:8px;color:var(--ink2);text-align:center;}
+.prov .pdef b{color:var(--red);font-size:16px;font-family:'IM Fell English SC';display:block;line-height:.9;margin-top:0}
+.prov.tgt{outline:3px dashed var(--red);outline-offset:2px;cursor:pointer;box-shadow:2px 3px 0 rgba(60,45,25,.28),0 0 18px rgba(143,45,34,.6);}
+.prov.march{outline:3px dashed #2f6f3a;outline-offset:2px;cursor:pointer;}
+.prov.tgtlock{outline:3px dotted #b0a58c;outline-offset:2px;cursor:pointer;}
+.prov.tgtlock:after{content:"🔒";position:absolute;top:2px;left:4px;font-size:11px}
+.prov.selectable{cursor:pointer;}
+.prov .banner{position:absolute;top:-9px;right:6px;width:15px;height:20px;z-index:4;
+  clip-path:polygon(0 0,100% 0,100% 78%,50% 100%,0 78%);box-shadow:1px 1px 0 rgba(0,0,0,.3);}
+.prov .banner:after{content:"";position:absolute;left:6px;top:-8px;width:2px;height:8px;background:#5a4a35;}
+.prov .spoil{position:absolute;top:2px;right:4px;font-size:10px;color:#7a2b22;transform:rotate(-8deg);}
+.region-tag{position:absolute;font-family:'IM Fell English SC',serif;font-size:12px;color:#6b5a3d;
+  opacity:.55;z-index:2;pointer-events:none;letter-spacing:1px;text-transform:uppercase;}
+
+/* armies */
+.army{position:absolute;z-index:6;width:54px;cursor:grab;user-select:none;
+  transform:translate(-50%,-50%) rotate(var(--arot,-3deg));}
+.army .card{background:var(--paper3);border:1.5px solid #9a866020;border-radius:3px;padding:3px 4px;
+  box-shadow:2px 3px 4px rgba(50,35,15,.35);position:relative;}
+.army .flag{height:5px;border-radius:2px 2px 0 0;margin:-1px -1px 3px;}
+.army .aname{font-size:9px;line-height:1.05;font-family:'Caveat',cursive;font-weight:700;}
+.army .astr{font-family:'IM Fell English SC',serif;font-size:16px;line-height:.9;text-align:center;}
+.army .apow{display:block;font-family:'Special Elite';font-size:7.5px;color:#8a2b22;letter-spacing:-.2px;line-height:1;margin-top:1px}
+.army .aatt{font-size:8px;color:var(--ink2);text-align:center;line-height:1.1;min-height:8px}
+.army.dragging{opacity:.85;cursor:grabbing;z-index:50;filter:drop-shadow(3px 6px 4px rgba(0,0,0,.4));}
+.army.mine{}
+.army.moved{filter:grayscale(.4) brightness(.96);}
+.army .streak{position:absolute;top:-7px;left:-7px;background:var(--gold);color:#000;font-size:9px;
+  border-radius:50%;width:16px;height:16px;text-align:center;line-height:16px;font-family:'Special Elite';box-shadow:1px 1px 2px rgba(0,0,0,.4)}
+
+/* player mats */
+.mat{position:absolute;width:186px;background:var(--paper2);border:1px solid #a8946c;border-radius:4px;
+  padding:7px 9px 8px;z-index:8;box-shadow:2px 3px 6px rgba(40,30,15,.35);font-size:12px;
+  transform:rotate(var(--mrot,0deg));}
+.mat h3{margin:0 0 3px;font-family:'IM Fell English SC',serif;font-size:15px;display:flex;align-items:center;gap:6px;}
+.mat h3 .dot{width:11px;height:11px;border-radius:2px;box-shadow:1px 1px 0 rgba(0,0,0,.3)}
+.mat .row{display:flex;justify-content:space-between;gap:6px;line-height:1.5}
+.mat .mech{font-family:'Caveat',cursive;font-size:14px;color:#5a4a35;font-weight:700;margin-top:2px;line-height:1.05}
+.mat.turn{outline:3px solid var(--gold);outline-offset:1px;box-shadow:0 0 16px rgba(184,134,11,.6)}
+.mat.dead{opacity:.45;filter:grayscale(.7)}
+.mat .youtag{font-size:10px;background:var(--ink);color:var(--paper);padding:0 5px;border-radius:8px;font-family:'Special Elite'}
+.mat .diplo{margin-top:4px;font-size:10.5px;color:#6b5030;min-height:12px;line-height:1.25}
+.mat .ruler{margin-top:3px;font-size:11px;color:#5a4a35;font-family:'IM Fell English SC';line-height:1.2;border-top:1px dotted #b7a57e;padding-top:3px}
+.mat.clickable{cursor:pointer}
+.mat.clickable:hover{outline:2px dashed var(--ink2);outline-offset:1px}
+.disc{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:-2px;margin-left:2px;
+  box-shadow:inset -1px -1px 2px rgba(0,0,0,.3),1px 1px 0 rgba(0,0,0,.2)}
+.disc.gold{background:radial-gradient(circle at 35% 30%,#f4d97a,#b8860b)}
+.disc.glory{background:radial-gradient(circle at 35% 30%,#e9e3d0,#9a8a63)}
+
+/* panel wrogów (zwijany, prawy-dolny róg) */
+#enemies{position:fixed;right:12px;bottom:112px;z-index:12;width:196px;display:flex;flex-direction:column;gap:5px;align-items:stretch}
+#enemies .ehint{font-family:'IM Fell English SC';font-size:10px;color:#8a7a58;text-align:right;letter-spacing:1px;margin-bottom:1px}
+.echip{background:var(--paper2);border:1px solid #a8946c;border-radius:6px;box-shadow:1px 2px 4px rgba(40,30,15,.3);overflow:hidden}
+.echip.turn{outline:2px solid var(--gold);outline-offset:-1px}
+.echip.dead{opacity:.5;filter:grayscale(.6)}
+.echip .ehead{display:flex;align-items:center;gap:5px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'IM Fell English SC'}
+.echip .ehead:hover{background:#efe0c0}
+.echip .ehead .dot{width:11px;height:11px;border-radius:2px;flex:none;box-shadow:1px 1px 0 rgba(0,0,0,.25)}
+.echip .ehead .emini{font-family:'Special Elite';font-size:9px;color:#5a4a35;margin-left:auto}
+.echip .ehead .ecaret{color:#8a7a58;margin-left:2px}
+.echip .edetail{padding:6px 9px 8px;border-top:1px dotted #b7a57e;background:var(--paper3)}
+.echip .edetail .row{display:flex;justify-content:space-between;line-height:1.5;font-size:12px}
+.echip .edetail .mech{font-family:'Caveat';font-size:13px;color:#5a4a35;font-weight:700;line-height:1.05;margin-top:2px}
+.echip .edetail .ruler{margin-top:3px;font-size:11px;font-family:'IM Fell English SC';border-top:1px dotted #b7a57e;padding-top:3px}
+.echip .edetail .diplo{margin-top:3px;font-size:10px;color:#6b5030;min-height:0}
+.echip .edetail .ediplo{margin-top:7px;width:100%;font-size:12px;padding:5px}
+
+/* totem */
+.totem{position:absolute;z-index:9;width:38px;text-align:center;cursor:pointer;transform:translate(-50%,-50%);}
+.totem .tt{font-size:26px;filter:drop-shadow(1px 2px 1px rgba(0,0,0,.4))}
+.totem .tl{font-size:8px;font-family:'IM Fell English SC';background:#efe4cf;border:1px solid #a8946c;border-radius:3px;padding:0 2px;white-space:nowrap;transform:translateX(-50%);margin-left:19px;position:absolute;}
+.totem.betrayed .tt{filter:drop-shadow(0 0 4px #b02) hue-rotate(-20deg)}
+
+/* hand */
+#hand{position:fixed;left:50%;bottom:-6px;transform:translateX(-50%);z-index:20;display:flex;gap:6px;
+  align-items:flex-end;padding:6px 10px 0;pointer-events:none;}
+.hcard{pointer-events:auto;width:96px;height:132px;background:var(--paper3);border:1px solid #9a8660;border-radius:5px;
+  box-shadow:1px 2px 6px rgba(40,25,10,.4);padding:6px 6px 4px;cursor:pointer;position:relative;
+  transform-origin:bottom center;transition:transform .12s,box-shadow .12s;transform:translateY(46px) rotate(var(--hrot,0deg));}
+#hand:hover .hcard{transform:translateY(52px) rotate(var(--hrot,0deg))}
+.hcard:hover{transform:translateY(-8px) rotate(0deg)!important;z-index:5;box-shadow:2px 6px 14px rgba(0,0,0,.45)}
+.hcard.sel{transform:translateY(-14px) rotate(0deg)!important;outline:3px solid var(--red);z-index:6}
+.hcard .hn{font-family:'IM Fell English SC',serif;font-size:11.5px;line-height:1.02;margin-bottom:3px}
+.hcard .ht{font-size:9px;color:#5a4a35;line-height:1.14}
+.hcard .htype{position:absolute;bottom:4px;left:6px;right:6px;font-size:8px;color:#8a2b22;
+  border-top:1px solid #c9b892;padding-top:2px;font-family:'Caveat';font-weight:700;font-size:12px}
+.hcard{border-left-width:5px}
+.hcard.type-taktyka{border-left-color:#3a6ea5}
+.hcard.type-intryga{border-left-color:#7a3aa5}
+.hcard.type-reakcja{border-left-color:#c07a1a}
+.hcard.type-taktyka .htype{color:#3a6ea5}
+.hcard.type-intryga .htype{color:#7a3aa5}
+.hcard.type-reakcja .htype{color:#c07a1a}
+.hcard.type-dowódca{border-left-color:#8f2d22}
+.hcard.type-postać{border-left-color:#b8860b}
+.hcard.type-wzmocnienie{border-left-color:#2f6f3a}
+.hcard.type-specjalna{border-left-color:#8a6d1a}
+.hcard.type-specjalna .htype{color:#8a6d1a}
+.hcard.type-dowódca .htype{color:#8f2d22}
+.hcard.type-postać .htype{color:#b8860b}
+.hcard.type-wzmocnienie .htype{color:#2f6f3a}
+.hcard.face-down{background:repeating-linear-gradient(45deg,#7a2d22 0 8px,#6a251c 8px 16px);}
+.hcard.face-down .hn,.hcard.face-down .ht,.hcard.face-down .htype{visibility:hidden}
+.hcard.face-down:after{content:"?";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'IM Fell English SC';font-size:40px;color:#efe4cf;opacity:.6}
+
+/* chaos */
+#round{position:fixed;right:14px;top:12px;z-index:10;background:#e9dcc0;border:1px solid #a8946c;border-radius:50%;
+  width:74px;height:74px;text-align:center;box-shadow:2px 3px 6px rgba(0,0,0,.35);transform:rotate(3deg)}
+#round .rl{font-size:9px;color:#8a2b22;margin-top:11px;font-family:'IM Fell English SC'}
+#round .rn{font-family:'IM Fell English SC';font-size:26px;line-height:.9}
+#round .rs{font-size:9px;color:#5a4a35}
+#help{position:fixed;right:98px;top:22px;z-index:11;width:34px;height:34px;border-radius:50%;cursor:pointer;
+  background:#efe4cf;border:1px solid #a8946c;box-shadow:2px 3px 5px rgba(0,0,0,.3);
+  font-family:'IM Fell English SC';font-size:22px;color:#8a2b22;text-align:center;line-height:33px;transform:rotate(-4deg)}
+#help:hover{background:#f6efdd;transform:rotate(-4deg) scale(1.08)}
+
+/* end turn seal */
+#seal{position:fixed;right:22px;bottom:18px;z-index:22;width:82px;height:82px;border-radius:50%;cursor:pointer;
+  background:radial-gradient(circle at 40% 35%,#a63b2c,#7a1f14);color:#f2e2c0;border:2px solid #5a140c;
+  box-shadow:2px 4px 8px rgba(0,0,0,.4),inset 0 0 12px rgba(0,0,0,.4);font-family:'IM Fell English SC';
+  font-size:12px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.05;
+  transform:rotate(-6deg);transition:transform .1s}
+#seal:hover{transform:rotate(-6deg) scale(1.06)}
+#seal.off{filter:grayscale(.6) brightness(.8);cursor:default}
+#seal small{font-size:9px;opacity:.85}
+
+/* chronicle */
+#chron{position:fixed;left:16%;top:6px;z-index:12;width:22%;max-height:24vh;overflow:auto;
+  background:rgba(255,255,255,.92);border:1px solid #d0c7b4;border-radius:6px;padding:6px 12px;font-size:11px;
+  box-shadow:2px 3px 7px rgba(0,0,0,.3)}
+#chron h4{margin:0 0 4px;font-family:'IM Fell English SC';font-size:13px;color:#8a2b22}
+.tk{margin:0 0 5px;line-height:1.28}
+.tk .who{font-family:'Caveat';font-weight:700;font-size:14px}
+.tk.sys{color:#6b5030;font-style:italic;font-size:10.5px}
+.tk .say{color:#3a2c18}
+
+/* battle modal */
+.veil{position:fixed;inset:0;z-index:100;background:rgba(30,22,12,.55);display:none;align-items:center;justify-content:center}
+.veil.on{display:flex}
+#battle{width:min(920px,96vw);max-height:94vh;overflow:auto;background:
+   radial-gradient(900px 500px at 50% 20%,#e7d8b6,#cdba90);border:2px solid #7a663f;border-radius:8px;
+  padding:16px 18px 18px;box-shadow:0 12px 40px rgba(0,0,0,.5);position:relative}
+#battle h2{font-family:'IM Fell English SC';margin:0 0 2px;font-size:22px;text-align:center}
+#battle .bsub{text-align:center;font-size:12px;color:#5a4a35;margin-bottom:10px}
+.battlefield{display:flex;gap:14px;justify-content:center;align-items:stretch;margin-bottom:12px;flex-wrap:wrap}
+.side{flex:1;min-width:250px;background:rgba(246,239,221,.7);border:1px solid #b7a57e;border-radius:6px;padding:9px 11px}
+.side h3{margin:0 0 4px;font-family:'IM Fell English SC';font-size:16px}
+.side .est{font-family:'IM Fell English SC';font-size:15px;color:#8a2b22}
+.slots{display:flex;gap:6px;margin-top:7px;min-height:104px;flex-wrap:wrap}
+.slot{width:70px;height:98px;border:2px dashed #a8946c;border-radius:5px;display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:#a8946c;text-align:center;background:rgba(255,255,255,.2)}
+.slot .mini{width:100%;height:100%;border-radius:4px;padding:4px;font-size:8.5px;line-height:1.08;position:relative;
+  background:repeating-linear-gradient(45deg,#7a2d22 0 7px,#6a251c 7px 14px);color:#f2e2c0;display:flex;align-items:center;justify-content:center;text-align:center;font-family:'IM Fell English SC'}
+.slot .mini.rev{background:var(--paper3);color:var(--ink)}
+.slot .mini .mn{font-family:'IM Fell English SC';font-size:9px;margin-bottom:2px}
+.slot .mini .me{font-size:8px;color:#8a2b22}
+.vs{align-self:center;font-family:'IM Fell English SC';font-size:26px;color:#8a2b22}
+#nego{background:rgba(246,239,221,.6);border:1px solid #b7a57e;border-radius:6px;padding:8px 10px;margin-bottom:10px}
+#nego .nlog{max-height:150px;overflow:auto;font-size:11.5px;margin-bottom:6px}
+#nego .nrow{display:flex;gap:6px}
+#nego input{flex:1;font-family:'Special Elite';padding:6px 8px;border:1px solid #a8946c;border-radius:4px;background:#f6efdd}
+.btn{font-family:'IM Fell English SC';font-size:14px;padding:6px 14px;border:1px solid #5a140c;border-radius:4px;cursor:pointer;
+  background:radial-gradient(circle at 40% 35%,#a63b2c,#7a1f14);color:#f2e2c0;box-shadow:1px 2px 3px rgba(0,0,0,.3)}
+.btn.ghost{background:#e6d7b8;color:var(--ink);border-color:#a8946c}
+.btn:disabled{filter:grayscale(.6) opacity(.6);cursor:default}
+#battle .bhand{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+#battle .bhand .hcard{transform:none!important;height:120px;width:88px}
+#battle .bhand .hcard:hover{transform:translateY(-6px)!important}
+.bactions{display:flex;gap:10px;justify-content:center;margin-top:12px}
+#battle .hint{text-align:center;font-size:11px;color:#6b5030;margin-top:6px;min-height:14px}
+
+/* generic modal */
+#msg{width:min(560px,94vw);background:var(--paper);border:2px solid #7a663f;border-radius:8px;padding:20px 22px;
+  box-shadow:0 12px 40px rgba(0,0,0,.5)}
+#msg h2{font-family:'IM Fell English SC';margin:0 0 8px;font-size:24px}
+#msg p{font-size:13px;line-height:1.4}
+#msg input,#msg select{font-family:'Special Elite';width:100%;padding:8px;border:1px solid #a8946c;border-radius:4px;background:#f6efdd;margin:6px 0}
+#msg .opts{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+#msg .opt{border:1px solid #a8946c;border-radius:5px;padding:8px 11px;cursor:pointer;background:#f6efdd}
+#msg .opt:hover{background:#efe0c0;outline:2px solid var(--ink2)}
+#msg .opt b{font-family:'IM Fell English SC'}
+#toast{position:fixed;left:50%;top:145px;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
+.toast{background:rgba(43,33,23,.94);color:#f2e2c0;padding:7px 14px;border-radius:5px;font-size:12.5px;
+  box-shadow:0 3px 10px rgba(0,0,0,.4);font-family:'Special Elite';max-width:70vw;text-align:center}
+.thinking{display:inline-block;color:#8a2b22;font-style:italic}
+.dots:after{content:"";animation:dots 1.2s steps(4,end) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#a8946c;border-radius:4px}
+/* --- animacje kart na stole --- */
+.flycard{position:fixed;z-index:300;width:92px;min-height:64px;border-radius:6px;pointer-events:none;
+  background:var(--paper3);border:1px solid #9a8660;border-left:5px solid #9a8660;padding:6px 7px;
+  box-shadow:2px 8px 20px rgba(0,0,0,.45);
+  transform:translate(-50%,-50%) rotate(var(--fr,0deg)) scale(.55);opacity:0;
+  transition:left .5s cubic-bezier(.2,.85,.3,1),top .5s cubic-bezier(.2,.85,.3,1),transform .5s cubic-bezier(.2,.85,.3,1),opacity .3s;}
+.flycard.in{transform:translate(-50%,-50%) rotate(var(--fr,0deg)) scale(1);opacity:1;}
+.flycard.out{opacity:0;transform:translate(-50%,-50%) rotate(var(--fr,0deg)) scale(.92) translateY(-16px);transition:opacity .5s,transform .5s;}
+.flycard .fwho{font-family:'Caveat';font-weight:700;font-size:12px;line-height:1;margin-bottom:2px}
+.flycard .fn{font-family:'IM Fell English SC';font-size:11px;line-height:1.05}
+.flycard .ft{font-size:8.5px;color:#5a4a35;margin-top:3px;line-height:1.1}
+.fx-pulse{position:fixed;z-index:295;width:36px;height:36px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(255,214,120,.95),rgba(255,180,60,.25) 55%,transparent 70%);
+  transform:translate(-50%,-50%) scale(.3);opacity:.95;animation:fxpulse .6s ease-out forwards}
+@keyframes fxpulse{to{transform:translate(-50%,-50%) scale(2.7);opacity:0}}
+.fx-hit{animation:fxhit .8s ease-out}
+@keyframes fxhit{0%{box-shadow:0 0 0 0 rgba(255,205,90,.85)}100%{box-shadow:0 0 0 16px rgba(255,205,90,0)}}
+.fx-float{position:fixed;z-index:305;pointer-events:none;font-family:'IM Fell English SC';font-size:19px;font-weight:bold;color:#b8860b;text-shadow:0 1px 3px rgba(0,0,0,.5),0 0 6px rgba(255,235,180,.6);transform:translate(-50%,-50%);animation:fxfloat 1.4s ease-out forwards}
+#setupbar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:130;background:rgba(43,33,23,.96);color:#f2e2c0;padding:9px 14px;border-radius:9px;display:flex;gap:9px;align-items:center;font-size:12.5px;box-shadow:0 5px 16px rgba(0,0,0,.45);max-width:94vw;flex-wrap:wrap;font-family:'Special Elite'}
+#setupbar b{color:#e6c86a}
+.prov.setup{cursor:grab;outline:2px dashed #b7a57e;outline-offset:2px}
+.prov.setup:hover{outline-color:#8a2b22}
+.prov.setup.dragging{cursor:grabbing;box-shadow:3px 8px 16px rgba(0,0,0,.45);opacity:.93}
+@keyframes fxfloat{0%{opacity:0;transform:translate(-50%,-40%) scale(.5)}18%{opacity:1;transform:translate(-50%,-95%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-270%) scale(1)}}
+</style>
+
+<div id="table">
+  <svg id="links"></svg>
+  <div id="deck" title="Talia kart do dobierania"><div class="dcard d3"></div><div class="dcard d2"></div><div class="dcard d1">TALIA<br>KART</div></div>
+</div>
+<div id="round"><div class="rl">RUNDA</div><div class="rn" id="rn">1</div><div class="rs" id="rs">z 8</div></div>
+<div id="help" title="Zasady i sterowanie">?</div>
+<div id="chron"><h4>Kronika stołu</h4><div id="chlog"></div></div>
+<div id="hand"></div>
+<div id="seal" class="off">ZAKOŃCZ<br>TURĘ<br><small id="actn">2 akcje</small></div>
+
+<div class="veil" id="battleVeil"><div id="battle"></div></div>
+<div class="veil" id="msgVeil"><div id="msg"></div></div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* ===================== DANE ===================== */
+const REGIONS = {
+  zachod:{name:"Europa Zachodnia", provs:["brytania","belgica","galia","hispania"], tag:[3,29]},
+  srodek:{name:"Europa Środkowa", provs:["germania","panonia","dacja","iliria"], tag:[42,1]},
+  poludnie:{name:"Europa Południowa", provs:["italia","sycylia","grecja","balkany"], tag:[42,87]},
+  wschod:{name:"Europa Wschodnia", provs:["scytia","sarmacja","mezja","tracja"], tag:[88,29]},
+};
+const PROV = {
+  // ŚRODEK (góra-środek, 2×2)
+  germania:{name:"Germania", region:"srodek", def:4, x:40,y:5, rot:-1.5},
+  panonia: {name:"Panonia",  region:"srodek", def:4, x:48,y:5, rot:1},
+  dacja:   {name:"Dacja",    region:"srodek", def:5, x:40,y:18, rot:1.5},
+  iliria:  {name:"Iliria",   region:"srodek", def:3, x:48,y:18, rot:-1},
+  // ZACHÓD (lewa, 2×2)
+  brytania:{name:"Brytania", region:"zachod", def:2, x:8,y:33, rot:-1.5},
+  belgica: {name:"Belgica",  region:"zachod", def:3, x:16,y:33, rot:1},
+  galia:   {name:"Galia",    region:"zachod", def:4, x:8,y:46, rot:1},
+  hispania:{name:"Hispania", region:"zachod", def:3, x:16,y:46, rot:-1.5},
+  // WSCHÓD (prawa, 2×2)
+  scytia:  {name:"Scytia",   region:"wschod", def:3, x:73,y:33, rot:1.5},
+  sarmacja:{name:"Sarmacja", region:"wschod", def:4, x:81,y:33, rot:-1},
+  mezja:   {name:"Mezja",    region:"wschod", def:4, x:73,y:46, rot:-1.5},
+  tracja:  {name:"Tracja",   region:"wschod", def:5, x:81,y:46, rot:1},
+  // POŁUDNIE (dół-środek, 2×2)
+  italia:  {name:"Italia (Rzym)", region:"poludnie", def:6, x:40,y:60, rot:-1},
+  sycylia: {name:"Sycylia",  region:"poludnie", def:3, x:48,y:60, rot:1.5},
+  grecja:  {name:"Grecja",   region:"poludnie", def:4, x:40,y:73, rot:1},
+  balkany: {name:"Bałkany",  region:"poludnie", def:4, x:48,y:73, rot:-1.5},
+};
+const ADJ_RAW = {
+  brytania:["belgica","galia"],
+  belgica:["brytania","galia","germania"],
+  galia:["brytania","belgica","hispania","germania","italia"],
+  hispania:["galia","italia","sycylia"],
+  germania:["belgica","galia","panonia","dacja","italia"],
+  panonia:["germania","dacja","iliria","italia"],
+  dacja:["germania","panonia","mezja","scytia"],
+  iliria:["panonia","italia","balkany","grecja"],
+  italia:["galia","hispania","germania","panonia","iliria","sycylia"],
+  sycylia:["hispania","italia","grecja"],
+  grecja:["iliria","balkany","sycylia","tracja"],
+  balkany:["iliria","grecja","mezja","tracja"],
+  mezja:["dacja","balkany","tracja","scytia"],
+  tracja:["grecja","balkany","mezja","scytia"],
+  scytia:["dacja","mezja","tracja","sarmacja"],
+  sarmacja:["scytia","mezja"],
+};
+const ADJ={};
+Object.keys(ADJ_RAW).forEach(a=>{ADJ[a]=new Set(ADJ_RAW[a])});
+Object.keys(ADJ_RAW).forEach(a=>ADJ_RAW[a].forEach(b=>ADJ[b].add(a)));
+
+const FACTIONS = {
+  rome:  {name:"Zachodnie Cesarstwo", short:"Rzym", color:"var(--rome)", raw:"#7a1f1f",
+    mech:"DEKADENCJA — masz najwięcej ziem, ale imperium gnije. Za każdą prowincję ponad 3 rośnie Dekadencja; próg = bunt. CHWAŁA ZA PRZETRWANIE: +2/rundę za Italię, +1/rundę gdy Dekadencja ≤2.",
+    persona:"Zblazowany, cyniczny rzymski dygnitarz. Uważasz barbarzyńców za prostaków, mówisz wyniośle i sarkastycznie, ale panicznie boisz się utraty ziem. Chętnie kupujesz sobie pokój złotem."},
+  goths: {name:"Goci", short:"Goci", color:"var(--goth)", raw:"#2f5f3a",
+    mech:"WIELKA WĘDRÓWKA — seria podbojów wzmacnia Armię (+1 Siły/punkt, max +3). CHWAŁA ZA PĘD: każdy podbój daje tyle Chwały, ile długa seria (max 4). Postój bez podboju kasuje serię.",
+    persona:"Ambitny gocki wódz w ciągłym marszu. Gadasz butnie i obrazowo, nienawidzisz stać w miejscu, kochasz atakować. Sojusze traktujesz jak chwilową wygodę."},
+  vandals:{name:"Wandalowie", short:"Wandalowie", color:"var(--vandal)", raw:"#3a2a55",
+    mech:"ZŁUPIĆ I SPALIĆ — po zwycięstwie zamiast zająć możesz ZŁUPIĆ prowincję: +2 Złota i +2 Chwały (RZYM: +4 i +4!), zostaje Spustoszona. CHWAŁA ZA ŁUP, nie za trzymanie ziemi.",
+    persona:"Rozbójniczy, chaotyczny wódz Wandalów. Uwielbiasz grabież i zamęt, gadasz zaczepnie i z czarnym humorem. Obietnice składasz łatwo i łamiesz jeszcze łatwiej."},
+  gauls: {name:"Galowie", short:"Galowie", color:"var(--gaul)", raw:"#1f4d6b",
+    mech:"KONFEDERACJA — możesz wystawić więcej Armii (do 3) i taniej (2 Złota). CHWAŁA ZA WODZÓW: +1/rundę za KAŻDĄ Armię ponad pierwszą (2 armie=+1, 3=+2).",
+    persona:"Wódz kłótliwej galijskiej konfederacji plemion. Gadasz z galijską fantazją, lubisz się targować, chętnie zawiązujesz sojusze przeciw silniejszym — a potem narzekasz na sojuszników."},
+};
+const MAT_POS = { gauls:[1,2], goths:[82,2], rome:[1,80], vandals:[82,80] };
+
+/* karty */
+const CARDS = {
+  odwaga:{n:"NAGŁY PRZYPŁYW ODWAGI", t:"taktyka", d:"+2 Siły w tej bitwie.", eff:"str2"},
+  strzaly:{n:"DESZCZ STRZAŁ", t:"taktyka", d:"+2 Siły, gdy atakujesz.", eff:"atk2"},
+  zasadzka:{n:"ZASADZKA", t:"taktyka", d:"+3 Siły, gdy się bronisz.", eff:"def3"},
+  mur:{n:"JESZCZE JEDEN MUR!", t:"taktyka", d:"Broniona prowincja +2 Obrony.", eff:"wall2"},
+  zwiad:{n:"TO BYŁ TYLKO ZWIAD!", t:"taktyka", d:"Jeśli przegrywasz atak — wycofaj się bez strat.", eff:"retreat"},
+  przekup:{n:"PRZEKUPIONY DOWÓDCA", t:"taktyka", d:"Wrogi Dowódca nie daje premii.", eff:"negcmd"},
+  mina:{n:"GROŹNA MINA", t:"taktyka", d:"Nie robi nic. Ale wygląda groźnie.", eff:"bluff"},
+  pogrozki:{n:"PUSTE POGRÓŻKI", t:"taktyka", d:"Kompletnie bezużyteczna. Połóż ją zakrytą.", eff:"bluff"},
+  falszywe:{n:"FAŁSZYWE POSIŁKI", t:"reakcja", d:"Jako wsparcie: zamiast pomóc, dajesz -2 Sile wspieranego.", eff:"false"},
+  odwaga2:{n:"BOHATERSKA GŁUPOTA", t:"taktyka", d:"+2 Siły. Prawdopodobnie zginiesz i tak.", eff:"str2"},
+  zerwac:{n:"ZERWAĆ SZTANDAR!", t:"intryga", d:"Usuń wrogi sztandar z prowincji bez Armii, sąsiadującej z twoją.", eff:"tearbanner"},
+  przekupstwo:{n:"SAKIEWKA POD STOŁEM", t:"intryga", d:"Ukradnij 2 Złota wybranej frakcji.", eff:"bribe"},
+  mapa:{n:"KTO UKRADŁ MAPĘ?", t:"intryga", d:"Wybrana wroga Armia nie może się ruszyć w następnej turze.", eff:"nomove"},
+  teraz:{n:"TERAZ!", t:"intryga", d:"(W bitwie) Zerwij Sojusz z sąsiadem tuż przed starciem i uderz — +3 Siły.", eff:"betray"},
+  pulapka:{n:"WSZYSTKO WEDŁUG PLANU", t:"taktyka", d:"Jako obrońca: jeśli atakujący położył 2 zakryte karty, wpada w pułapkę — jego atak -4 Siły.", eff:"trap"},
+  // --- nowe TAKTYKI ---
+  podstep:{n:"PODSTĘP", t:"taktyka", d:"+3 Siły, JEŚLI przeciwnik nie położył żadnej zakrytej karty (karze pewniaków).", eff:"punish"},
+  potop:{n:"NAWAŁNICA", t:"taktyka", d:"+3 Siły w tej bitwie. Wal na całość.", eff:"str3"},
+  // --- nowe INTRYGI ---
+  sabotaz:{n:"SABOTAŻ MURÓW", t:"intryga", d:"Wybrana prowincja na stałe traci 1 Obrony.", eff:"sabotage"},
+  szpieg:{n:"SZPIEG W OBOZIE", t:"intryga", d:"Podejrzyj rękę wybranej frakcji (pokaże się w Kronice).", eff:"spy"},
+  // --- DOWÓDCY (t:"dowódca" — przypinasz do Armii, max 1; bonus = cb) ---
+  alaryk:{n:"ALARYK", t:"dowódca", d:"+1 Siły; +2 gdy atakujesz ziemię Rzymu. Wódz Gotów.", cb:(a,at,to)=>to==="rome"?2:1, rule:"triumf: +1 Chwały/rundę", ruleEff:"glory"},
+  teodoryk:{n:"TEODORYK", t:"dowódca", d:"+2 Siły gdy atakujesz. Król Ostrogotów.", cb:(a,at)=>at?2:0},
+  belizariusz:{n:"BELIZARIUSZ", t:"dowódca", d:"+2 Siły w obronie. Ostatni wielki wódz Rzymu.", cb:(a,at)=>at?0:2, rule:"prestiż: +1 Chwały/rundę", ruleEff:"glory"},
+  aecjusz:{n:"AECJUSZ", t:"dowódca", d:"+1 Siły; +2 gdy bronisz. „Ostatni Rzymianin\".", cb:(a,at)=>at?1:2, rule:"autorytet: +1 Chwały/rundę", ruleEff:"glory"},
+  stilichon:{n:"STILICHON", t:"dowódca", d:"+2 Siły zawsze. Wandal w służbie Rzymu.", cb:()=>2, rule:"świetny wódz, KIEPSKI cesarz: -1 Złota/rundę", ruleEff:"badgold"},
+  genzeryk:{n:"GENZERYK", t:"dowódca", d:"+1 Siły; po złupieniu +1 Złota. Król Wandalów.", cb:()=>1, rule:"skarbnik grabieży: +1 Złota/rundę", ruleEff:"gold"},
+  brennus:{n:"BRENNUS", t:"dowódca", d:"+1 Siły; +2 gdy atakujesz ziemię Rzymu. „Vae victis!\" Wódz Galów.", cb:(a,at,to)=>to==="rome"?2:1, rule:"legenda: +1 Chwały/rundę", ruleEff:"glory"},
+  // --- WIELKIE POSTACIE (t:"postać" — najemnik za Złoto, potężny) ---
+  attyla:{n:"ATTYLA, BICZ BOŻY", t:"postać", d:"Najemnik: zapłać 3 Złota, by dołączyć do Armii jako Dowódca. +3 Siły. Służy temu, kto płaci.", cb:()=>3, cost:3},
+  // --- WZMOCNIENIA (t:"wzmocnienie" — trwałe, max 2; premia = rb) ---
+  tarcze:{n:"ŚCIANA TARCZ", t:"wzmocnienie", d:"+2 Siły, gdy się bronisz.", rb:(a,at)=>at?0:2},
+  furia:{n:"BERSERKERSKA FURIA", t:"wzmocnienie", d:"+2 Siły, gdy atakujesz.", rb:(a,at)=>at?2:0},
+  jazda:{n:"LEKKA JAZDA", t:"wzmocnienie", d:"+1 Siły zawsze. Szybkie zagony.", rb:()=>1},
+  oblezenie:{n:"MACHINY OBLĘŻNICZE", t:"wzmocnienie", d:"+2 Siły, gdy atakujesz umocnioną Prowincję (Obrona ≥4).", rb:(a,at,p)=>(at&&p&&effDef(p)>=4)?2:0, cond:"⚔+2 vs umocnione (Obrona ≥4)"},
+  wozy:{n:"WOZY PEŁNE DOBYTKU", t:"wzmocnienie", d:"Po zdobyciu Prowincji +1 Chwały. Cały twój dobytek jedzie z tobą.", rb:()=>0, onConq:true},
+  // --- PODSTAWOWI WŁADCY (poza talią, po jednym na frakcję) ---
+  rulerRome:{n:"KOLEJNY, PRZECIĘTNY CESARZ", t:"władca", basic:true, d:"Zwykły facet w koronie. Zero bonusu — po prostu trzyma Rzym poza Bezkrólewiem."},
+  rulerGoth:{n:"KRÓL, KTÓREGO WSZYSCY JAKOŚ UZNAJĄ", t:"władca", basic:true, d:"Patrzy podejrzliwie na wodzów. Zero bonusu — trzyma Gotów poza Bezkrólewiem."},
+  rulerVand:{n:"KRÓL OD GRABIEŻY", t:"władca", basic:true, d:"Woli łódź niż tron. Zero bonusu — trzyma Wandalów poza Bezkrólewiem."},
+  rulerGaul:{n:"JEDEN Z WIELU PRETENDENTÓW", t:"władca", basic:true, d:"Twierdzi, że to jego kolej. Zero bonusu — trzyma Galów poza Bezkrólewiem."},
+};
+const BASIC_RULER={ rome:"rulerRome", goths:"rulerGoth", vandals:"rulerVand", gauls:"rulerGaul" };
+/* ===== PEŁNA TALIA RZYMU (36 kart) — wzorzec talii frakcyjnej ===== */
+Object.assign(CARDS,{
+  // POSTACIE (Aecjusz/Stilichon już zdefiniowane wyżej)
+  r_idiota:{n:"CESARZ IDIOTA", t:"postać", d:"Jako Władca: bałagan (-1 Złota/rundę). Jako Dowódca: nic. Trzyma mapę do góry nogami.", cb:()=>0, rule:"chaos: -1 Złota/rundę", ruleEff:"badgold"},
+  r_chwilowy:{n:"CESARZ CHWILOWY", t:"postać", d:"Jako Władca: +1 Chwały/rundę, ale każdy już czeka na jego miejsce.", cb:()=>0, rule:"blask: +1 Chwały/rundę", ruleEff:"glory"},
+  r_prefekt:{n:"PREFEKT, KTÓRY NIC NIE WIE", t:"postać", d:"Skromny Dowódca (+1 Siły). Podobno coś tam podejrzy.", cb:()=>1},
+  r_admin:{n:"DOBRY ADMINISTRATOR, ŻADEN WOJOWNIK", t:"postać", d:"Jako Władca: +1 Złota/rundę przy ≥3 Prowincjach. W boju kompletnie bezużyteczny.", cb:()=>0, rule:"skarbnik: +1 Złota/rundę przy ≥3 Prowincjach", ruleEff:"admingold"},
+  // WZMOCNIENIA
+  r_komandosi:{n:"ZAGINIENI KOMANDOSI SPOD LASU TEUTOBURSKIEGO", t:"wzmocnienie", d:"+2 Siły; w Germanii +1. Wyszli z krzaków po 400 latach.", rb:(a)=>2+(a&&a.loc==="germania"?1:0)},
+  r_legion:{n:"OSTATNI PRAWDZIWY LEGION", t:"wzmocnienie", d:"+2 Siły; w obronie +1. Jeden wyprostowany legionista pośród chaosu.", rb:(a,at)=>2+(at?0:1)},
+  r_weterani:{n:"WETERANI, KTÓRZY WSZYSTKO WIDZIELI", t:"wzmocnienie", d:"+1 Siły. Twardzi jak głaz i śmiertelnie znudzeni.", rb:()=>1},
+  r_gwardia:{n:"GWARDIA CESARSKA", t:"wzmocnienie", d:"+1 Siły; +2 jeśli masz Władcę. Gwardzista przy (byle jakim) tronie.", rb:(a)=>(S.f[a.f].ruler&&!S.f[a.f].interregnum)?2:1},
+  r_pobor:{n:"TRZECI RZUT POBORU", t:"wzmocnienie", d:"+2 Siły. Bardzo młody rekrut w za dużym hełmie.", rb:()=>2},
+  r_kohorta:{n:"JESZCZE JEDNA KOHORTA", t:"wzmocnienie", d:"+1 Siły; +2 jeśli Armia ma już inne Wzmocnienie.", rb:(a)=>(a.reinf&&a.reinf.length>1)?2:1},
+  r_orzel:{n:"ORZEŁ LEGIONU", t:"wzmocnienie", d:"+2 w ataku, +1 w obronie. Nie oddadzą go bez trupów.", rb:(a,at)=>at?2:1},
+  r_saperzy:{n:"SAPERZY I MACHINY", t:"wzmocnienie", d:"+2 przy ataku na umocnioną Prowincję (Obrona ≥4).", rb:(a,at,p)=>(at&&p&&effDef(p)>=4)?2:0, cond:"⚔+2 vs umocnione (Obrona ≥4)"},
+  // TAKTYKI / REAKCJE
+  r_brama:{n:"ZAMKNĄĆ BRAMĘ!", t:"taktyka", d:"Obrona: +2 Siły (+1 w Italii).", eff:"zamknij"},
+  r_nieDzisiaj:{n:"JESZCZE NIE DZISIAJ", t:"reakcja", d:"Anuluj wrogą Taktykę — przeciwnik -2 Siły.", eff:"enemyminus2"},
+  r_wycofanie:{n:"WYCOFANIE TAKTYCZNE", t:"reakcja", d:"Przegrywając atak — wycofaj się bez strat. Dumnie.", eff:"retreat"},
+  r_zaCesarza:{n:"ZA CESARZA! KTÓREGO?", t:"taktyka", d:"+2 Siły, jeśli masz Władcę.", eff:"rulerbonus"},
+  r_toRzym:{n:"TO NADAL JEST RZYM", t:"taktyka", d:"Obrona: +3 Siły. Stary Rzymianin na stołku nie ustąpi.", eff:"def3"},
+  r_kontrola:{n:"WSZYSTKO JEST POD KONTROLĄ", t:"reakcja", d:"Anuluj wredny efekt wroga — przeciwnik -2 Siły. W tle ogień.", eff:"enemyminus2"},
+  r_senatCzas:{n:"SENAT KUPIŁ NAM CZAS", t:"taktyka", d:"Przekupstwo w bitwie: przeciwnik -2 Siły.", eff:"enemyminus2"},
+  r_szyk:{n:"RZYMSKI SZYK", t:"taktyka", d:"+2 Siły. Dyscyplina legionu.", eff:"str2"},
+  r_nieSzybko:{n:"NIE TAK SZYBKO", t:"taktyka", d:"+2 Siły. Barbarzyńca złapany za płaszcz.", eff:"str2"},
+  r_pozor:{n:"POZORY MOCY", t:"taktyka", d:"Nic nie robi. Ale wygląda dostojnie. (blef)", eff:"bluff"},
+  // KARTY SPECJALNE (zagrywasz z ręki, kosztują Akcję)
+  r_nowyCesarz:{n:"NOWY CESARZ!", t:"specjalna", d:"W Bezkrólewiu: natychmiast nowy Władca — koniec Bezkrólewia.", eff:"endinterregnum"},
+  r_kurczy:{n:"IMPERIUM SIĘ KURCZY", t:"specjalna", d:"Dobierz kartę. Im mniej ziem, tym więcej sprytu.", eff:"draw1"},
+  r_tymczasowe:{n:"TO TYLKO TYMCZASOWE", t:"specjalna", d:"Dobierz 2 karty. Odzyskamy to (raczej nie).", eff:"draw2"},
+  r_dokumenty:{n:"JESZCZE MAMY DOKUMENTY", t:"specjalna", d:"+1 Chwały. Biurokracja ratuje honor.", eff:"glory1"},
+  r_przeorg:{n:"RZYM SIĘ PRZEORGANIZOWUJE", t:"specjalna", d:"+1 Złota i dobierz kartę. To nie odwrót, to reorganizacja.", eff:"gold1draw1"},
+  r_murprov:{n:"JESZCZE JEDEN MUR", t:"specjalna", d:"Wybrana Twoja Prowincja: +2 Obrony na stałe.", eff:"wallprov"},
+  r_naWojne:{n:"CESARZ POJECHAŁ NA WOJNĘ", t:"specjalna", d:"+1 Chwały. Cesarz udaje, że dowodzi.", eff:"glory1"},
+  r_onNieZyje:{n:"ON NIE ŻYJE? JUŻ?", t:"specjalna", d:"Dobierz 2 karty. Sukcesja to chaos — i okazja.", eff:"draw2"},
+  r_senatDeb:{n:"SENAT DEBATUJE", t:"specjalna", d:"Dobierz kartę. Senat obraduje (czyli zawsze).", eff:"draw1"},
+  r_bunt:{n:"KOLEJNY BUNT", t:"specjalna", d:"Dobierz 2 karty w zamęcie buntu.", eff:"draw2"},
+  r_skarbiec:{n:"SKARBIEC JEST PUSTY", t:"specjalna", d:"Strać 1 Złoto, dobierz 2 karty (albo 3, jeśli masz 0 Złota).", eff:"skarbiec"},
+  r_gorzej:{n:"MIAŁO BYĆ GORZEJ", t:"specjalna", d:"+1 Złota. Legionista patrzy na dym i wzrusza ramionami.", eff:"gold1"},
+});
+const FULL_DECK={ rome:["aecjusz","stilichon","r_idiota","r_chwilowy","r_prefekt","r_admin",
+  "r_komandosi","r_legion","r_weterani","r_gwardia","r_pobor","r_kohorta","r_orzel","r_saperzy",
+  "r_brama","r_nieDzisiaj","r_wycofanie","r_zaCesarza","r_toRzym","r_kontrola","r_senatCzas","r_szyk","r_nieSzybko","r_pozor",
+  "r_nowyCesarz","r_kurczy","r_tymczasowe","r_dokumenty","r_przeorg","r_murprov","r_naWojne","r_onNieZyje","r_senatDeb","r_bunt","r_skarbiec","r_gorzej"] };
+/* ===== PEŁNA TALIA GOTÓW (36 kart) — tożsamość: MOBILNOŚĆ, pęd, Wędrówka, atak ===== */
+Object.assign(CARDS,{
+  // POSTACIE (Alaryk/Teodoryk już wyżej)
+  g_dalej:{n:"WÓDZ, KTÓRY ZAWSZE CHCE IŚĆ DALEJ", t:"postać", d:"Jako Dowódca: +2 Siły w ataku. Zawsze patrzy poza mapę.", cb:(a,at)=>at?2:0},
+  g_stary:{n:"STARY WÓDZ, KTÓRY PAMIĘTA INNĄ TRASĘ", t:"postać", d:"Jako Dowódca: +1 Siły. Jako Władca: +1 Złota/rundę (zna skróty).", cb:()=>1, rule:"spryt: +1 Złota/rundę", ruleEff:"gold"},
+  g_mlody:{n:"MŁODY WÓDZ, ZA BARDZO PEWNY SIEBIE", t:"postać", d:"Jako Dowódca: +2 Siły w ataku. Ginie łatwiej, niż myśli.", cb:(a,at)=>at?2:0},
+  g_liczywozy:{n:"TEN, KTÓRY UMIE LICZYĆ WOZY", t:"postać", d:"Jako Władca: +1 Złota/rundę (organizacja taboru). W boju kiepski.", cb:()=>0, rule:"tabor: +1 Złota/rundę", ruleEff:"gold"},
+  // WZMOCNIENIA
+  g_kuzyni:{n:"KUZYNI, O KTÓRYCH NIKT NIE PYTAŁ", t:"wzmocnienie", d:"+2 Siły. Za każdym wojownikiem stoją kolejni identyczni.", rb:()=>2},
+  g_dobytek:{n:"WOZY PEŁNE CAŁEGO DOBYTKU", t:"wzmocnienie", d:"Po zdobyciu Prowincji +1 Chwały. Cały tabor jedzie z hordą.", rb:()=>0, onConq:true},
+  g_hordy:{n:"HORDY, KTÓRE JESZCZE NIE WIEDZĄ, GDZIE IDĄ", t:"wzmocnienie", d:"+2 Siły w ataku. Patrzą na trzy drogowskazy naraz.", rb:(a,at)=>at?2:0},
+  g_wetwedr:{n:"WETERANI WĘDRÓWKI", t:"wzmocnienie", d:"+1 Siły. Zmęczeni, oparci o kij, ale niezniszczalni.", rb:()=>1},
+  g_klan:{n:"JESZCZE JEDEN KLAN", t:"wzmocnienie", d:"+1 Siły; +2 jeśli Armia ma już inne Wzmocnienie.", rb:(a)=>(a.reinf&&a.reinf.length>1)?2:1},
+  g_konie:{n:"NAJLEPSZE KONIE W CAŁEJ GERMANII", t:"wzmocnienie", d:"+2 Siły w ataku. Koń wygląda pewniej niż jeździec.", rb:(a,at)=>at?2:0},
+  g_murowie:{n:"WOJOWNICY, KTÓRZY NIE LUBIĄ MURÓW", t:"wzmocnienie", d:"+2 Siły przy ataku na umocnioną Prowincję (Obrona ≥4).", rb:(a,at,p)=>(at&&p&&effDef(p)>=4)?2:0, cond:"⚔+2 vs umocnione (Obrona ≥4)"},
+  g_zapozno:{n:"CI, KTÓRZY PRZYSZLI ZA PÓŹNO", t:"wzmocnienie", d:"+2 Siły. Wpadają zdyszani w ostatniej chwili.", rb:()=>2},
+  // TAKTYKI / REAKCJE
+  g_dalejT:{n:"DALEJ!", t:"taktyka", d:"+2 Siły w ataku. Palec wskazuje dalej.", eff:"atk2"},
+  g_nieKonczymy:{n:"JESZCZE NIE KOŃCZYMY", t:"reakcja", d:"Przegrywając atak — wycofaj się bez strat.", eff:"retreat"},
+  g_niePoTo:{n:"NIE PO TO TYLE SZLIŚMY", t:"taktyka", d:"+2 Siły w ataku. Tyle drogi się nie marnuje.", eff:"atk2"},
+  g_zaNim:{n:"WSZYSCY ZA NIM!", t:"taktyka", d:"+2 Siły, jeśli masz Władcę. Tłum biegnie za jednym.", eff:"rulerbonus"},
+  g_nieUcieczka:{n:"TO NIE BYŁA UCIECZKA", t:"reakcja", d:"Przegrywając — wycofaj się bez strat. To był manewr.", eff:"retreat"},
+  g_omijamy:{n:"OMIJAMY TO", t:"reakcja", d:"Anuluj obronę wroga — przeciwnik -2 Siły. Got przechodzi obok muru.", eff:"enemyminus2"},
+  g_wiecejLudzi:{n:"MAMY WIĘCEJ LUDZI", t:"taktyka", d:"+3 Siły. Zza jednego wojownika wychyla się tłum.", eff:"str3"},
+  g_tamLepiej:{n:"TAM WYGLĄDA LEPIEJ", t:"taktyka", d:"+2 Siły. Got odwraca drogowskaz.", eff:"str2"},
+  g_szarza:{n:"NIE ZATRZYMUJCIE SIĘ", t:"taktyka", d:"+2 Siły w ataku. Nogi same niosą.", eff:"atk2"},
+  g_przypadek:{n:"PRZEZ PRZYPADEK TO DZIAŁA", t:"taktyka", d:"+2 Siły. Got patrzy zdziwiony na działającą machinę.", eff:"str2"},
+  // KARTY SPECJALNE
+  g_wielkaWedr:{n:"WIELKA WĘDRÓWKA", t:"specjalna", d:"+1 Złota i dobierz kartę. Ruch to potęga; ślady stóp poza kartą.", eff:"gold1draw1"},
+  g_nieWiemy:{n:"NIE WIEMY JESZCZE, GDZIE MIESZKAMY", t:"specjalna", d:"Dobierz 2 karty. Namiot ze znakiem zapytania.", eff:"draw2"},
+  g_tuTez:{n:"TU TEŻ NIE ZOSTAJEMY", t:"specjalna", d:"+1 Złota i dobierz kartę. Got już wychodzi z dopiero zdobytego miejsca.", eff:"gold1draw1"},
+  g_krolIdzie:{n:"KRÓL IDZIE Z NAMI", t:"specjalna", d:"+1 Chwały. Król niesiony (za wysoko) na tarczy.", eff:"glory1"},
+  g_bojka:{n:"KTO WYGRA BÓJKĘ, TEN RZĄDZI", t:"specjalna", d:"W Bezkrólewiu: natychmiast nowy Władca. Dwie pięści i korona.", eff:"endinterregnum"},
+  g_niMaKrola:{n:"NIE MA KRÓLA? TO MAMY PROBLEM", t:"specjalna", d:"Dobierz kartę w zamęcie. Pusty tron, wściekli wojownicy.", eff:"draw1"},
+  g_kilometry:{n:"ZROBILIŚMY JUŻ TYLE KILOMETRÓW", t:"specjalna", d:"+1 Chwały. Bardzo zużyte sandały.", eff:"glory1"},
+  g_przyszlismy:{n:"PRZYSZLIŚMY PO TO", t:"specjalna", d:"Dobierz kartę. Got trzyma rzymski hełm jak trofeum.", eff:"draw1"},
+  g_rzeka:{n:"JESZCZE JEDNA RZEKA", t:"specjalna", d:"Dobierz kartę. Got po kolana w wodzie i wściekły.", eff:"draw1"},
+  g_nieTakMialo:{n:"NIE TAK MIAŁO BYĆ, ALE DOBRZE", t:"specjalna", d:"Dobierz kartę i wzrusz ramionami.", eff:"draw1"},
+  g_zmeczeni:{n:"WSZYSCY SĄ JUŻ ZMĘCZENI", t:"specjalna", d:"+1 Złota. Wojownik śpi na tarczy.", eff:"gold1"},
+  g_moze:{n:"A MOŻE JEDNAK TAM", t:"specjalna", d:"Dobierz kartę. Trzy strzałki w trzy różne strony.", eff:"draw1"},
+});
+FULL_DECK.goths=["alaryk","teodoryk","g_dalej","g_stary","g_mlody","g_liczywozy",
+  "g_kuzyni","g_dobytek","g_hordy","g_wetwedr","g_klan","g_konie","g_murowie","g_zapozno",
+  "g_dalejT","g_nieKonczymy","g_niePoTo","g_zaNim","g_nieUcieczka","g_omijamy","g_wiecejLudzi","g_tamLepiej","g_szarza","g_przypadek",
+  "g_wielkaWedr","g_nieWiemy","g_tuTez","g_krolIdzie","g_bojka","g_niMaKrola","g_kilometry","g_przyszlismy","g_rzeka","g_nieTakMialo","g_zmeczeni","g_moze"];
+/* ===== PEŁNA TALIA WANDALÓW (36 kart) — tożsamość: GRABIEŻ, łup, rajd, chaos ===== */
+Object.assign(CARDS,{
+  // POSTACIE (Genzeryk już wyżej)
+  v_rajder:{n:"WÓDZ RAJDU, KTÓRY NIGDY NIE ŚPI", t:"postać", d:"Jako Dowódca: +2 Siły w ataku. Uderza, zanim się obudzą.", cb:(a,at)=>at?2:0},
+  v_niszczyciel:{n:"NISZCZYCIEL MIAST", t:"postać", d:"Jako Dowódca: +2 Siły w ataku. Zostawia po sobie popiół.", cb:(a,at)=>at?2:0},
+  v_lupiezca:{n:"STARY ŁUPIEŻCA", t:"postać", d:"Jako Dowódca: +1 Siły. Jako Władca: +1 Złota/rundę (zna cenę wszystkiego).", cb:()=>1, rule:"chciwość: +1 Złota/rundę", ruleEff:"gold"},
+  v_kapitan:{n:"KAPITAN, KTÓRY ZNA KAŻDĄ ZATOKĘ", t:"postać", d:"Jako Dowódca: +2 Siły w ataku. Wpłynie tam, gdzie nikt się nie spodziewa.", cb:(a,at)=>at?2:0},
+  v_pirat:{n:"PIRAT, KTÓRY UDAJE KRÓLA", t:"postać", d:"Jako Władca: chaos — -1 Złota/rundę. W boju bezużyteczny, za to głośny.", cb:()=>0, rule:"pijacki bałagan: -1 Złota/rundę", ruleEff:"badgold"},
+  // WZMOCNIENIA
+  v_lodzie:{n:"JESZCZE WIĘCEJ LUDZI Z ŁODZI", t:"wzmocnienie", d:"+2 Siły. Z każdej fali wychodzą kolejni.", rb:()=>2},
+  v_pochodnie:{n:"POCHODNIE I SMOŁA", t:"wzmocnienie", d:"+2 Siły w ataku. Wszystko się pali.", rb:(a,at)=>at?2:0},
+  v_tarany:{n:"TARANY Z ROZBITYCH WRAKÓW", t:"wzmocnienie", d:"+2 Siły przy ataku na umocnioną Prowincję (Obrona ≥4).", rb:(a,at,p)=>(at&&p&&effDef(p)>=4)?2:0, cond:"⚔+2 vs umocnione (Obrona ≥4)"},
+  v_lup:{n:"WOZY PEŁNE ŁUPU", t:"wzmocnienie", d:"Po zdobyciu Prowincji +1 Chwały. Cały łup jedzie z hordą.", rb:()=>0, onConq:true},
+  v_najemnicy:{n:"NAJEMNICY ZNIKĄD", t:"wzmocnienie", d:"+1 Siły; +2 jeśli Armia ma już inne Wzmocnienie.", rb:(a)=>(a.reinf&&a.reinf.length>1)?2:1},
+  v_berserk:{n:"PIJANI BERSERKERZY", t:"wzmocnienie", d:"+2 Siły w ataku. Nic nie czują, o nic nie pytają.", rb:(a,at)=>at?2:0},
+  v_konie:{n:"SZYBKIE KONIE Z RAJDU", t:"wzmocnienie", d:"+1 Siły. Uciekną z łupem, zanim ktoś zareaguje.", rb:()=>1},
+  v_zwiadowcy:{n:"ZWIADOWCY WYBRZEŻA", t:"wzmocnienie", d:"+1 Siły. Wiedzą, gdzie jest złoto.", rb:()=>1},
+  // TAKTYKI / REAKCJE
+  v_szturm:{n:"NA MURY!", t:"taktyka", d:"+2 Siły w ataku.", eff:"atk2"},
+  v_zaskoczenie:{n:"ZNIENACKA", t:"taktyka", d:"+2 Siły w ataku. Nikt się nie spodziewał.", eff:"atk2"},
+  v_odwrot:{n:"ZŁUP I WIEJ", t:"reakcja", d:"Przegrywając atak — wycofaj się bez strat (z tym, co zabrałeś).", eff:"retreat"},
+  v_podpal:{n:"PODPALIĆ WSZYSTKO", t:"taktyka", d:"+3 Siły. Skoro i tak nie zostajemy.", eff:"str3"},
+  v_falsz:{n:"FAŁSZYWA FLAGA", t:"reakcja", d:"Anuluj wredny efekt wroga — przeciwnik -2 Siły.", eff:"enemyminus2"},
+  v_zdrada:{n:"NÓŻ W PLECY", t:"reakcja", d:"Anuluj cios wroga — przeciwnik -2 Siły.", eff:"enemyminus2"},
+  v_krzyk:{n:"DZIKI WRZASK", t:"taktyka", d:"+2 Siły. Sam hałas onieśmiela.", eff:"str2"},
+  v_lawina:{n:"LUDZKA LAWINA", t:"taktyka", d:"+2 Siły. Ciałem naprzód.", eff:"str2"},
+  v_zasadzka:{n:"ZASADZKA W ZATOCE", t:"taktyka", d:"+3 Siły, gdy się bronisz.", eff:"def3"},
+  v_bebny:{n:"GROŹNE BĘBNY", t:"taktyka", d:"Nic nie robią. Ale dudnią złowrogo. (blef)", eff:"bluff"},
+  // KARTY SPECJALNE (łup, złoto)
+  v_zlupic:{n:"ZŁUPIĆ I SPALIĆ", t:"specjalna", d:"+2 Złota z łupu. Prowincja płonie za wami.", eff:"gold2"},
+  v_skarb:{n:"SKARB Z ŁODZI", t:"specjalna", d:"+2 Złota. Ktoś źle ukrył kufer.", eff:"gold2"},
+  v_okup:{n:"WYMUSIĆ OKUP", t:"specjalna", d:"+1 Złota i dobierz kartę. Płać albo płoń.", eff:"gold1draw1"},
+  v_wakacje:{n:"WAKACJE W RZYMIE", t:"specjalna", d:"+1 Chwały. Zwiedzanie połączone z grabieżą.", eff:"glory1"},
+  v_nowyKrol:{n:"NOWY KRÓL Z BÓJKI", t:"specjalna", d:"W Bezkrólewiu: natychmiast nowy Władca. Kto silniejszy, ten król.", eff:"endinterregnum"},
+  v_zaraza:{n:"ZOSTAWIAMY ZARAZĘ", t:"specjalna", d:"+1 Złota. Bierzemy złoto, zostawiamy problem.", eff:"gold1"},
+  v_handel:{n:"HANDEL ŁUPEM", t:"specjalna", d:"+1 Złota i dobierz kartę. Sprzedajemy, co ukradliśmy.", eff:"gold1draw1"},
+  v_rekruci:{n:"WIĘCEJ ŁODZI", t:"specjalna", d:"Dobierz kartę. Zawsze przypłynie ktoś jeszcze.", eff:"draw1"},
+  v_mapa:{n:"SKRADZIONA MAPA WYBRZEŻY", t:"specjalna", d:"Dobierz kartę. Wiemy, gdzie uderzyć.", eff:"draw1"},
+  v_uczta:{n:"PIJACKA UCZTA", t:"specjalna", d:"Dobierz 2 karty w ogólnym zamęcie.", eff:"draw2"},
+  v_zloto:{n:"WYKOPANE ZŁOTO", t:"specjalna", d:"+1 Złota. Ktoś zakopał, my odkopaliśmy.", eff:"gold1"},
+  v_chaos:{n:"OGÓLNY ZAMĘT", t:"specjalna", d:"Dobierz kartę. W chaosie zawsze coś się znajdzie.", eff:"draw1"},
+});
+FULL_DECK.vandals=["genzeryk","v_rajder","v_niszczyciel","v_lupiezca","v_kapitan","v_pirat",
+  "v_lodzie","v_pochodnie","v_tarany","v_lup","v_najemnicy","v_berserk","v_konie","v_zwiadowcy",
+  "v_szturm","v_zaskoczenie","v_odwrot","v_podpal","v_falsz","v_zdrada","v_krzyk","v_lawina","v_zasadzka","v_bebny",
+  "v_zlupic","v_skarb","v_okup","v_wakacje","v_nowyKrol","v_zaraza","v_handel","v_rekruci","v_mapa","v_uczta","v_zloto","v_chaos"];
+/* ===== PEŁNA TALIA GALÓW (36 kart) — tożsamość: KONFEDERACJA wodzów, wielość, chaos, elastyczność ===== */
+Object.assign(CARDS,{
+  // POSTACIE (Brennus już wyżej)
+  ga_wodz1:{n:"WÓDZ, KTÓRY MYŚLI, ŻE DOWODZI", t:"postać", d:"Jako Dowódca: +1 Siły. Reszta go tak jakby słucha.", cb:()=>1},
+  ga_wodz2:{n:"WÓDZ Z SĄSIEDNIEJ DOLINY", t:"postać", d:"Jako Dowódca: +2 Siły w ataku. Przyszedł z własnym plemieniem.", cb:(a,at)=>at?2:0},
+  ga_druid:{n:"DRUID, KTÓRY WIDZIAŁ ZNAKI", t:"postać", d:"Jako Władca: +1 Chwały/rundę (autorytet duchowy). W boju żadny.", cb:()=>0, rule:"znaki: +1 Chwały/rundę", ruleEff:"glory"},
+  ga_wodz3:{n:"NAJGŁOŚNIEJSZY WÓDZ", t:"postać", d:"Jako Dowódca: +2 Siły w ataku. Jako Władca: chaos (-1 Złota/rundę).", cb:(a,at)=>at?2:0, rule:"awantury: -1 Złota/rundę", ruleEff:"badgold"},
+  ga_wodz4:{n:"WÓDZ, KTÓRY OBIECAŁ WSZYSTKIM WSZYSTKO", t:"postać", d:"Jako Władca: +1 Złota/rundę (zbiera daniny). Polityk, nie wojownik.", cb:()=>1, rule:"daniny: +1 Złota/rundę", ruleEff:"gold"},
+  // WZMOCNIENIA
+  ga_plemie:{n:"DRUGIE PLEMIĘ JEDNAK PRZYSZŁO", t:"wzmocnienie", d:"+2 Siły. Jednak się pojawili — spóźnieni, ale są.", rb:()=>2},
+  ga_procarze:{n:"PROCARZE Z GÓR", t:"wzmocnienie", d:"+2 Siły w ataku. Trafiają z daleka.", rb:(a,at)=>at?2:0},
+  ga_jazda:{n:"GALIJSKA JAZDA", t:"wzmocnienie", d:"+2 Siły w ataku. Szybka i głośna.", rb:(a,at)=>at?2:0},
+  ga_tarcze:{n:"WIELKIE OWALNE TARCZE", t:"wzmocnienie", d:"+2 Siły, gdy się bronisz.", rb:(a,at)=>at?0:2},
+  ga_klan:{n:"JESZCZE JEDNO PLEMIĘ", t:"wzmocnienie", d:"+1 Siły; +2 jeśli Armia ma już inne Wzmocnienie.", rb:(a)=>(a.reinf&&a.reinf.length>1)?2:1},
+  ga_bard:{n:"BARD, KTÓRY DODAJE ODWAGI", t:"wzmocnienie", d:"+1 Siły. Śpiewa tak, że nie wypada uciec.", rb:()=>1},
+  ga_zbrojni:{n:"ZBROJNI ZE WSZYSTKICH DOLIN", t:"wzmocnienie", d:"+2 Siły. Przyszli wszyscy naraz.", rb:()=>2},
+  ga_wilki:{n:"WOJOWNICY-WILKI", t:"wzmocnienie", d:"+2 Siły w ataku. Walczą w skórach i wrzeszczą.", rb:(a,at)=>at?2:0},
+  // TAKTYKI / REAKCJE
+  ga_szarza:{n:"GALIJSKA SZARŻA", t:"taktyka", d:"+2 Siły w ataku.", eff:"atk2"},
+  ga_furia:{n:"FURIA PLEMIENNA", t:"taktyka", d:"+3 Siły. Wszyscy naraz, bez planu.", eff:"str3"},
+  ga_zasadzka:{n:"ZASADZKA W LESIE", t:"taktyka", d:"+3 Siły, gdy się bronisz.", eff:"def3"},
+  ga_okrzyk:{n:"BOJOWY OKRZYK", t:"taktyka", d:"+2 Siły. Aż liście spadają.", eff:"str2"},
+  ga_odwrot:{n:"ROZPROSZYĆ SIĘ W LASACH", t:"reakcja", d:"Przegrywając atak — wycofaj się bez strat.", eff:"retreat"},
+  ga_sojusz:{n:"NAGŁY SOJUSZ PLEMION", t:"taktyka", d:"+2 Siły, jeśli masz Władcę. Na chwilę się dogadali.", eff:"rulerbonus"},
+  ga_klotnia:{n:"KŁÓTNIA W SZEREGACH WROGA", t:"reakcja", d:"Zamieszaj przeciwnikowi — -2 Siły.", eff:"enemyminus2"},
+  ga_pulapka:{n:"PUŁAPKA NA RZYMIAN", t:"taktyka", d:"+3 Siły, gdy się bronisz.", eff:"def3"},
+  ga_klatwa:{n:"KLĄTWA DRUIDA", t:"reakcja", d:"Osłab wroga — przeciwnik -2 Siły.", eff:"enemyminus2"},
+  ga_blef:{n:"WIELKIE GADANIE", t:"taktyka", d:"Nic nie robi. Ale wódz gada tak, jakby. (blef)", eff:"bluff"},
+  // KARTY SPECJALNE (konfederacja, dobór, chaos)
+  ga_zjazd:{n:"ZJAZD WODZÓW", t:"specjalna", d:"Dobierz 2 karty. Każdy przyszedł z własnym pomysłem.", eff:"draw2"},
+  ga_kolejka:{n:"KAŻDY UWAŻA, ŻE TERAZ JEGO KOLEJ", t:"specjalna", d:"W Bezkrólewiu: natychmiast nowy Władca (ktoś w końcu przekrzyczy resztę).", eff:"endinterregnum"},
+  ga_targ:{n:"TARG PLEMIENNY", t:"specjalna", d:"+1 Złota i dobierz kartę.", eff:"gold1draw1"},
+  ga_przysiega:{n:"PRZYSIĘGA NA MIECZE", t:"specjalna", d:"+1 Chwały. Tym razem na pewno dotrzymają (nie).", eff:"glory1"},
+  ga_bunt:{n:"BUNT MŁODYCH WODZÓW", t:"specjalna", d:"Dobierz 2 karty w zamęcie.", eff:"draw2"},
+  ga_danina:{n:"DANINA OD WIOSEK", t:"specjalna", d:"+1 Złota. Wioski płacą, żeby mieć spokój.", eff:"gold1"},
+  ga_zdrada:{n:"KTÓRYŚ WÓDZ SIĘ DOGADAŁ", t:"specjalna", d:"+1 Złota. Ktoś wziął łapówkę i dobrze.", eff:"gold1"},
+  ga_wiec:{n:"WIELKI WIEC", t:"specjalna", d:"Dobierz kartę. Gadają, gadają, ale coś ustalą.", eff:"draw1"},
+  ga_skarb:{n:"UKRYTY SKARB DRUIDÓW", t:"specjalna", d:"+1 Złota. Święty gaj miał podwójne dno.", eff:"gold1"},
+  ga_nowewodz:{n:"NOWY WÓDZ Z TŁUMU", t:"specjalna", d:"Dobierz kartę. Zawsze wyrośnie kolejny pretendent.", eff:"draw1"},
+  ga_chaos:{n:"OGÓLNE ZAMIESZANIE", t:"specjalna", d:"Dobierz kartę. W galijskim chaosie zawsze coś się trafi.", eff:"draw1"},
+  ga_jednosc:{n:"CHWILOWA JEDNOŚĆ", t:"specjalna", d:"+1 Chwały. Przez moment naprawdę się zjednoczyli.", eff:"glory1"},
+});
+FULL_DECK.gauls=["brennus","ga_wodz1","ga_wodz2","ga_druid","ga_wodz3","ga_wodz4",
+  "ga_plemie","ga_procarze","ga_jazda","ga_tarcze","ga_klan","ga_bard","ga_zbrojni","ga_wilki",
+  "ga_szarza","ga_furia","ga_zasadzka","ga_okrzyk","ga_odwrot","ga_sojusz","ga_klotnia","ga_pulapka","ga_klatwa","ga_blef",
+  "ga_zjazd","ga_kolejka","ga_targ","ga_przysiega","ga_bunt","ga_danina","ga_zdrada","ga_wiec","ga_skarb","ga_nowewodz","ga_chaos","ga_jednosc"];
+// Talia = pełna talia frakcyjna (FULL_DECK) albo wspólna pula (COMMON, x2) + karty frakcyjne (x1)
+const COMMON=["odwaga","strzaly","zasadzka","mur","zwiad","mina","pogrozki","falszywe","przekup","zerwac","przekupstwo","mapa","odwaga2","pulapka","podstep","potop","sabotaz","szpieg","attyla"];
+const FACTION_CARDS={
+  rome:["belizariusz","aecjusz","stilichon","tarcze","oblezenie","mur"],
+  goths:["alaryk","teodoryk","furia","jazda","potop"],
+  vandals:["genzeryk","furia","wozy","teraz","zerwac"],
+  gauls:["brennus","jazda","wozy","teraz","przekupstwo"],
+};
+function makeDeck(f){ let d; if(FULL_DECK[f]){ d=FULL_DECK[f].slice(); } else { d=[]; COMMON.forEach(k=>{d.push(k);d.push(k)}); (FACTION_CARDS[f]||[]).forEach(k=>d.push(k)); } d=d.concat(EVENTS); return shuffle(d); }
+
+const CHAOS=[
+ {n:"CESARZ ZNOWU NIE ŻYJE", d:"Rzym traci cesarza: +2 Dekadencji, -1 Złota.", fn:s=>{s.f.rome.dek+=2;s.f.rome.gold=Math.max(0,s.f.rome.gold-1)}},
+ {n:"BARBARZYŃCY U BRAM", d:"Każda frakcja z Armią przy Italii dostaje +1 Złota.", fn:s=>{alive().forEach(k=>{ if(armiesOf(k).some(a=>ADJ["italia"].has(a.loc)||a.loc==="italia")) s.f[k].gold++ })}},
+ {n:"PLAGA", d:"Każdy traci 1 Złota (albo 1 Chwałę).", fn:s=>{alive().forEach(k=>{ if(s.f[k].gold>0)s.f[k].gold--; else s.f[k].glory=Math.max(0,s.f[k].glory-1)})}},
+ {n:"WIELKA MIGRACJA", d:"Poruszające się Armie odzyskują możliwość ruchu. Rusz się albo giń.", fn:s=>{s.armies.forEach(a=>a.moved=false)}},
+ {n:"OSTRA ZIMA", d:"W tej rundzie nikt nie może Rekrutować.", fn:s=>{s.noRecruit=true}},
+ {n:"NOWY CESARZ", d:"Rzym łapie oddech: -2 Dekadencji, +1 Złota.", fn:s=>{s.f.rome.dek=Math.max(0,s.f.rome.dek-2);s.f.rome.gold++}},
+ {n:"KLĘSKA GŁODU", d:"Frakcja z największą liczbą prowincji traci 1 Chwałę.", fn:s=>{let m=alive().sort((a,b)=>provCount(b)-provCount(a))[0]; if(m)s.f[m].glory=Math.max(0,s.f[m].glory-1)}},
+ {n:"NIEPOROZUMIENIE DYPLOMATYCZNE", d:"Jeden istniejący Formalny Sojusz zostaje rozwiązany.", fn:s=>{ if(s.alliances.length){let al=s.alliances.shift(); talkSys(`Sojusz ${FACTIONS[al.a].short}–${FACTIONS[al.b].short} rozpadł się w kłótni o to, kto zaczął.`)} }},
+ {n:"ATTYLA PRZECHODZI", d:"Losowa zajęta prowincja bez Armii traci sztandar — Attyla ją tratuje.", fn:s=>{let ps=Object.keys(PROV).filter(p=>s.prov[p].owner && !armyAt(p)); if(ps.length){let p=ps[(seedInt())%ps.length]; talkSys(`Attyla przetacza się przez ${PROV[p].name} — sztandar ${FACTIONS[s.prov[p].owner].short} w błocie.`); s.prov[p].owner=null}}},
+];
+// Karty CHAOSU trafiają do WSPÓLNEJ talii jako WYDARZENIA — odpalają się w chwili dobrania (nie ma osobnej talii Chaosu).
+const EVENTS=[]; CHAOS.forEach((c,idx)=>{ const k="ev_"+idx; CARDS[k]={n:c.n, t:"wydarzenie", d:c.d, fn:c.fn}; EVENTS.push(k); });
+
+/* ===================== STAN ===================== */
+let S=null, sel=null, battle=null, busy=false, RNG=1234567, expandedEnemy=null;
+function seedInt(){ RNG=(RNG*1103515245+12345)&0x7fffffff; return RNG>>>3 }
+function rand(){ return (seedInt()%100000)/100000 }
+function d6(){ return 1+Math.floor(rand()*6) } // k6 z wyższych bitów (młodsze bity LCG są wypaczone)
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){let j=seedInt()%(i+1);[a[i],a[j]]=[a[j],a[i]]} return a }
+function alive(){ return Object.keys(FACTIONS).filter(k=>S.f[k].alive) }
+function armiesOf(k){ return S.armies.filter(a=>a.f===k) }
+function armyAt(p){ return S.armies.find(a=>a.loc===p) }
+function provCount(k){ return Object.keys(PROV).filter(p=>S.prov[p].owner===k).length }
+function fullRegions(k){ let n=0; for(const r in REGIONS){ if(REGIONS[r].provs.every(p=>S.prov[p].owner===k)) n++; } return n; }
+function armyPrepared(a){ return !!(a && (a.cmd || (a.reinf&&a.reinf.length>=1))); }
+function attackGate(a,p){ const d=PROV[p].def;
+  if(d<=3) return {ok:true};
+  if(d>=6){ if(a.cmd||(a.reinf&&a.reinf.length>=2)) return {ok:true}; return {ok:false,msg:`${PROV[p].name} (Obrona ${d}): potrzeba Dowódcy albo 2 Wzmocnień.`}; }
+  if(armyPrepared(a)) return {ok:true};
+  return {ok:false,msg:`${PROV[p].name} (Obrona ${d}): potrzeba Przygotowanej Armii (Dowódca lub Wzmocnienie).`}; }
+function armyById(id){ return S.armies.find(a=>a.id===id) }
+function allianceOf(a,b){ return S.alliances.find(x=>(x.a===a&&x.b===b)||(x.a===b&&x.b===a)) }
+let AID=1;
+
+const START_HAND_N=4; // ile kart na starcie dostaje każdy gracz
+function newState(player){
+  S={ round:1, maxRounds:8, order:["rome","gauls","goths","vandals"], cur:0, actions:3, phase:"setup",
+      player, prov:{}, armies:[], f:{}, alliances:[], noRecruit:false, over:false, deckPos:{x:45,y:38} };
+  Object.keys(PROV).forEach(p=>S.prov[p]={owner:null, px:PROV[p].x, py:PROV[p].y});
+  for(const k in FACTIONS){ S.f[k]={name:FACTIONS[k].name, gold:3, glory:0, alive:true, deck:makeDeck(k), hand:[], dek:0, streak:0, conqThisTurn:false, diplo:"", ruler:BASIC_RULER[k], interregnum:false, rulerInArmy:null}; }
+  // Faza SETUP: brak właścicieli, armii i rąk — to wszystko rozdaje beginPlay() po kliknięciu START.
+}
+const START_OWN={ rome:["italia","grecja"], goths:["panonia"], vandals:["germania"], gauls:["galia"] };
+function beginPlay(){
+  if(!S||S.phase!=="setup") return;
+  S.phase="play";
+  for(const k in START_OWN) START_OWN[k].forEach(p=>S.prov[p].owner=k);
+  addArmy("rome","italia","Legiony Italii"); addArmy("goths","panonia","I Armia Gotów");
+  addArmy("vandals","germania","Horda Wandalów"); addArmy("gauls","galia","Zgraja Wodzów");
+  S.f.rome.gold=4;
+  for(const k in FACTIONS){ for(let i=0;i<START_HAND_N;i++) draw(k); }
+  talkSys(`▶ Gra rozpoczęta! Każdy dostał ${START_HAND_N} kart. Armie na pozycjach. Karty Wydarzeń wtasowane w talie.`);
+  const bar=document.getElementById("setupbar"); if(bar)bar.remove();
+  render();
+  if(S.order[S.cur]!==S.player){ advance(); } else toast("Twoja tura — kliknij Armię → wybierz prowincję.");
+}
+function addArmy(f,loc,name,str=3){ S.armies.push({id:AID++,f,loc,name,base:str,cmd:null,reinf:[],moved:false,blocked:false}); }
+function draw(k){ let d=S.f[k]; let guard=0;
+  while(guard++<20){ if(!d.deck.length)d.deck=makeDeck(k); let c=d.deck.pop(); if(!c)return null;
+    if(CARDS[c] && CARDS[c].t==="wydarzenie"){ resolveEvent(c,k); continue; } // WYDARZENIE odpala się od razu i nie trafia na rękę
+    d.hand.push(c); return c; }
+  return null; }
+function resolveEvent(c,k){ const cd=CARDS[c]; talkSys(`🎲 WYDARZENIE (dobrał ${FACTIONS[k]?FACTIONS[k].short:k}): ${cd.n} — ${cd.d}`); try{ throwCard(c,{who:"WYDARZENIE",color:"#8a2b22",to:[innerWidth/2,innerHeight*0.42],from:[innerWidth/2,-40]}); }catch(e){} try{ cd.fn(S); }catch(e){ console.warn(e); } }
+
+/* ===================== RENDER ===================== */
+const T=document.getElementById("table"), SVG=document.getElementById("links");
+function pxX(p){return p*T.clientWidth/100} function pxY(p){return p*T.clientHeight/100}
+function renderLinks(){ if(!S)return; let seen=new Set(), lines="";
+  for(const a in ADJ_RAW) for(const b of ADJ_RAW[a]){ let key=[a,b].sort().join("-"); if(seen.has(key))continue; seen.add(key);
+    let x1=pxX(S.prov[a].px)+40,y1=pxY(S.prov[a].py)+53,x2=pxX(S.prov[b].px)+40,y2=pxY(S.prov[b].py)+53;
+    lines+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#6b5a3d" stroke-width="2" stroke-dasharray="2 5" opacity="0.4"/>`; }
+  SVG.innerHTML=lines; }
+function render(){
+  if(!S) return;
+  renderLinks();
+  // clear provinces/armies/etc (keep svg)
+  [...T.querySelectorAll(".prov,.army,.region-tag,.totem")].forEach(e=>e.remove());
+  for(const r in REGIONS){ let d=document.createElement("div"); d.className="region-tag"; d.textContent=REGIONS[r].name.replace("Europa ","");
+    d.style.left=REGIONS[r].tag[0]+"%"; d.style.top=REGIONS[r].tag[1]+"%"; T.appendChild(d); }
+  for(const p in PROV){ const pr=PROV[p], o=S.prov[p].owner;
+    let d=document.createElement("div"); d.className="prov r-"+pr.region+(S.phase==="setup"?" setup":""); d.dataset.p=p; d.style.left=S.prov[p].px+"%"; d.style.top=S.prov[p].py+"%"; d.style.setProperty("--rot",pr.rot+"deg");
+    d.innerHTML=`<div class="rband"></div><div class="pname">${pr.name}</div><div class="rlabel">${REGIONS[pr.region].name.replace("Europa ","")}</div><div class="pmid"></div><div class="pdef">Obrona <b>${effDef(p)}</b></div>`;
+    if(o){ let b=document.createElement("div"); b.className="banner"; b.style.background=FACTIONS[o].color; d.appendChild(b); }
+    else if(S.prov[p].spoiled){ let sp=document.createElement("div"); sp.className="spoil"; sp.textContent="🔥"; d.appendChild(sp); }
+    if(S.phase==="setup"){ makeProvDraggable(d,p); } else { d.onclick=()=>onProv(p); }
+    T.appendChild(d);
+  }
+  // armies
+  S.armies.forEach(a=>{ const pr=PROV[a.loc], pp=S.prov[a.loc];
+    let d=document.createElement("div"); d.className="army"+(a.f===S.player?" mine":"")+(a.moved||a.blocked?" moved":""); d.dataset.id=a.id;
+    d.style.left=(pp.px+2.9)+"%"; d.style.top=(pp.py+6.5)+"%";
+    const atk=armyAtk(a), def=armyDef(a), buffed=(atk!==a.base||def!==a.base);
+    d.title=armyBreakdown(a);
+    d.innerHTML=`<div class="card"><div class="flag" style="background:${FACTIONS[a.f].color}"></div>
+      <div class="aname">${a.name}</div><div class="astr">${armyStr(a)}${buffed?`<span class="apow">⚔${atk} 🛡${def}</span>`:""}</div>
+      <div class="aatt">${a.cmd?((a.rulerLed?"👑":"★")+cmdName(a.cmd)):""}${a.reinf.length?" +"+a.reinf.length+"⛨":""}</div></div>`;
+    if(a.f==="goths"&&S.f.goths.streak>0){ let s=document.createElement("div"); s.className="streak"; s.textContent="+"+Math.min(3,S.f.goths.streak); d.querySelector(".card").appendChild(s); }
+    if(a.f===S.player) makeDraggable(d,a);
+    d.onclick=(e)=>{ if(!d.dataset.dragged) onArmyClick(a); };
+    T.appendChild(d);
+  });
+  renderMats(); renderHand(); renderTop(); renderSetup(); positionDeck();
+}
+function cmdName(k){ return CARDS[k]?CARDS[k].n.split(" ")[0]:k }
+function positionDeck(){ const dk=document.getElementById("deck"); if(!dk||!S)return; if(S.deckPos){ dk.style.left=S.deckPos.x+"%"; dk.style.top=S.deckPos.y+"%"; } dk.style.cursor=S.phase==="setup"?"grab":"default"; }
+function makeProvDraggable(el,p){ el.style.cursor="grab";
+  el.addEventListener("mousedown",e=>{ if(!S||S.phase!=="setup")return; e.preventDefault(); e.stopPropagation();
+    const sx=e.clientX,sy=e.clientY,ox=S.prov[p].px,oy=S.prov[p].py; el.classList.add("dragging"); el.style.zIndex=50;
+    const mm=ev=>{ S.prov[p].px=Math.max(0,Math.min(94,ox+(ev.clientX-sx)/T.clientWidth*100)); S.prov[p].py=Math.max(0,Math.min(90,oy+(ev.clientY-sy)/T.clientHeight*100)); el.style.left=S.prov[p].px+"%"; el.style.top=S.prov[p].py+"%"; renderLinks(); };
+    const mu=()=>{ document.removeEventListener("mousemove",mm); document.removeEventListener("mouseup",mu); el.classList.remove("dragging"); el.style.zIndex=""; };
+    document.addEventListener("mousemove",mm); document.addEventListener("mouseup",mu); }); }
+function renderSetup(){ let bar=document.getElementById("setupbar");
+  if(!S||S.phase!=="setup"){ if(bar)bar.remove(); return; }
+  if(!bar){ bar=document.createElement("div"); bar.id="setupbar"; document.body.appendChild(bar); }
+  bar.innerHTML=`<span>🗺️ <b>UKŁADANIE STOŁU</b> — przeciągnij prowincje jak chcesz (i talię na środku). Gdy gotowe:</span>
+    <button class="btn ghost" id="setupDefault">↺ Domyślny układ</button>
+    <button class="btn" id="setupStart">▶ ROZPOCZNIJ GRĘ</button>`;
+  bar.querySelector("#setupStart").onclick=beginPlay;
+  bar.querySelector("#setupDefault").onclick=()=>{ Object.keys(PROV).forEach(p=>{S.prov[p].px=PROV[p].x;S.prov[p].py=PROV[p].y;}); S.deckPos={x:45,y:38}; render(); }; }
+function renderTop(){
+  document.getElementById("rn").textContent=S.round;
+  document.getElementById("rs").textContent="z "+S.maxRounds;
+  const seal=document.getElementById("seal"), myTurn=S.phase==="play" && S.order[S.cur]===S.player && !S.over && !busy;
+  seal.classList.toggle("off",!myTurn);
+  document.getElementById("actn").textContent=myTurn?(S.actions+" akcje"):"—";
+}
+function rulerLineHTML(k){ const f=S.f[k];
+  return `<div class="ruler" title="${f.interregnum?'Bezkrólewie':(CARDS[f.ruler]&&CARDS[f.ruler].rule?CARDS[f.ruler].rule:'brak bonusu jako Władca')}">${f.interregnum?'👑 <b style="color:#8a2b22">BEZKRÓLEWIE!</b>':('👑 '+(CARDS[f.ruler]?CARDS[f.ruler].n.split(",")[0]:'—')+(f.rulerInArmy?' <b style="color:#8a2b22">⚔ w Armii</b>':(CARDS[f.ruler]&&CARDS[f.ruler].ruleEff?' ✦':'')))}</div>`; }
+function matBody(k){ const f=S.f[k];
+  let extra = k==="rome"?`<div class="row"><span>Dekadencja</span><b style="color:#8a2b22">${f.dek}</b></div>`:"";
+  return `<div class="row"><span>Chwała <span class="disc glory"></span></span><b>${f.glory}</b></div>
+      <div class="row"><span>Złoto <span class="disc gold"></span></span><b>${f.gold}</b></div>
+      <div class="row"><span>Prowincje</span><b>${provCount(k)}</b> • <span>Armie ${armiesOf(k).length}</span></div>
+      ${extra}${rulerLineHTML(k)}
+      <div class="mech">${FACTIONS[k].mech.split("—")[0]}</div>`;
+}
+function renderMats(){
+  [...document.querySelectorAll(".mat")].forEach(m=>m.remove());
+  const pk=S.player, pf=S.f[pk];
+  let d=document.createElement("div"); d.className="mat playermat"+(S.order[S.cur]===pk?" turn":"")+(pf.alive?"":" dead");
+  d.style.left="1%"; d.style.top="2%"; d.style.setProperty("--mrot","-1deg");
+  d.innerHTML=`<h3><span class="dot" style="background:${FACTIONS[pk].color}"></span>${FACTIONS[pk].short} <span class="youtag">TY</span></h3>`+matBody(pk)+`<div class="diplo">${pf.diplo||""}</div>`;
+  if(pf.alive && S.order[S.cur]===pk && !busy){ d.classList.add("clickable"); d.title="Dwór: mianuj / poprowadź Władcę"; d.onclick=(e)=>{ e.stopPropagation(); openCourt(); }; }
+  document.body.appendChild(d);
+  renderEnemies();
+}
+function renderEnemies(){
+  let box=document.getElementById("enemies"); if(!box){ box=document.createElement("div"); box.id="enemies"; document.body.appendChild(box); }
+  box.innerHTML=`<div class="ehint">WROGOWIE — kliknij</div>`;
+  Object.keys(FACTIONS).filter(k=>k!==S.player).forEach(k=>{ const f=S.f[k]; const al=allianceOf(S.player,k);
+    let chip=document.createElement("div"); chip.className="echip"+(S.order[S.cur]===k?" turn":"")+(f.alive?"":" dead")+(expandedEnemy===k?" open":""); chip.dataset.k=k;
+    let head=document.createElement("div"); head.className="ehead";
+    head.innerHTML=`<span class="dot" style="background:${FACTIONS[k].color}"></span><b>${FACTIONS[k].short}</b>
+      <span class="emini">✦${f.glory} · ${f.gold}💰 · ${provCount(k)}▮</span>${al?' <span title="Sojusz">🗿</span>':''}${f.alive?'':' ☠'}
+      <span class="ecaret">${expandedEnemy===k?'▾':'▸'}</span>`;
+    head.onclick=(e)=>{ e.stopPropagation(); expandedEnemy = (expandedEnemy===k?null:k); renderEnemies(); };
+    chip.appendChild(head);
+    if(expandedEnemy===k){ let det=document.createElement("div"); det.className="edetail";
+      det.innerHTML=matBody(k)+`<div class="diplo">${f.diplo||""}</div>`;
+      if(f.alive && S.order[S.cur]===S.player && !busy){ let b=document.createElement("button"); b.className="btn ghost ediplo"; b.textContent=al?"Sojusz / zdrada":"Poselstwo / Sojusz"; b.onclick=(e)=>{ e.stopPropagation(); openDiplo(k); }; det.appendChild(b); }
+      chip.appendChild(det);
+    }
+    box.appendChild(chip);
+  });
+}
+function renderHand(){
+  const h=document.getElementById("hand"); h.innerHTML="";
+  const mine=S.f[S.player]; if(!mine)return;
+  mine.hand.forEach((c,i)=>{ const cd=CARDS[c];
+    let d=document.createElement("div"); d.className="hcard type-"+cd.t; d.style.setProperty("--hrot",((i-(mine.hand.length-1)/2)*3)+"deg");
+    d.innerHTML=`<div class="hn">${cd.n}</div><div class="ht">${cd.d}</div><div class="htype">${cd.t}</div>`;
+    d.onclick=()=>onHandCard(c,i); h.appendChild(d);
+  });
+}
+
+/* ===================== SIŁA / OBRONA ===================== */
+function armyStr(a){ let s=a.base; if(a.f==="goths") s+=Math.min(3,S.f.goths.streak); return s }
+function cmdBonus(a,attacking,targetOwner){
+  if(!a||!a.cmd) return 0; const cd=CARDS[a.cmd];
+  if(cd && typeof cd.cb==="function") return cd.cb(a,attacking,targetOwner)||0;
+  if(cd && cd.t==="władca") return 0; // podstawowy Władca: brak umiejętności wodza (liczy się +1 za obecność)
+  return 1;
+}
+function reinfBonus(a,attacking,prov){ if(!a||!a.reinf) return 0; let s=0;
+  a.reinf.forEach(r=>{ const cd=CARDS[r]; if(cd && typeof cd.rb==="function") s+=cd.rb(a,attacking,prov)||0; }); return s; }
+// pełna, żywa Siła armii (jak w bitwie, bez kart zagranych w tej bitwie)
+function armyAtk(a){ return armyStr(a)+cmdBonus(a,true,null)+reinfBonus(a,true)+(a.rulerLed?1:0); }
+function armyDef(a){ return armyStr(a)+cmdBonus(a,false,null)+reinfBonus(a,false)+(a.rulerLed?1:0); }
+function armyBreakdown(a){ const L=['Baza '+a.base];
+  if(a.f==="goths"&&S.f.goths.streak>0) L.push('Wędrówka +'+Math.min(3,S.f.goths.streak));
+  if(a.cmd&&CARDS[a.cmd]){ const cd=CARDS[a.cmd],at=cmdBonus(a,true,null),df=cmdBonus(a,false,null); L.push((a.rulerLed?'👑 ':'★ ')+cd.n.split(',')[0]+' '+(at===df?('+'+at):('⚔+'+at+' 🛡+'+df))); }
+  if(a.rulerLed) L.push('Władca na polu +1');
+  (a.reinf||[]).forEach(r=>{ const cd=CARDS[r]; if(cd){ if(cd.cond){ L.push('▪ '+cd.n+' ('+cd.cond+')'); } else { const at=cd.rb?cd.rb(a,true):0,df=cd.rb?cd.rb(a,false):0; L.push('▪ '+cd.n+' '+(at===df?('+'+at):('⚔+'+at+' 🛡+'+df))); } } });
+  L.push('———\nSiła: ⚔ '+armyAtk(a)+' w ataku · 🛡 '+armyDef(a)+' w obronie'); return L.join('\n'); }
+function effDef(p){ return PROV[p].def + (S.prov[p].wallBonus||0) }
+
+/* ===================== INTERAKCJA GRACZA ===================== */
+function onArmyClick(a){
+  if(busy||S.order[S.cur]!==S.player||S.over) return;
+  if(a.f!==S.player){ toast("To nie twoja Armia."); return; }
+  if(sel && sel.type==="army" && sel.a.id===a.id){ clearSel(); return; }
+  clearSel(); sel={type:"army",a}; highlightMoves(a);
+}
+function highlightMoves(a){
+  [...T.querySelectorAll(".prov")].forEach(el=>{ const p=el.dataset.p;
+    if(!ADJ[a.loc].has(p)) return;
+    const o=S.prov[p].owner, occupant=armyAt(p);
+    if(a.blocked){ return; }
+    if(o===S.player && !occupant){ el.classList.add("march"); }
+    else if(o!==S.player){ el.classList.add(attackGate(a,p).ok?"tgt":"tgtlock"); }
+    else { el.classList.add("march"); }
+  });
+  toast(a.blocked?"Ta Armia utknęła (ktoś ukradł mapę).":"Wybierz sąsiednią prowincję: zielona = marsz, czerwona = atak.");
+}
+function clearSel(){ sel=null; [...T.querySelectorAll(".tgt,.tgtlock,.march,.selectable")].forEach(e=>e.classList.remove("tgt","tgtlock","march","selectable")); }
+
+function onProv(p){
+  if(busy||S.over) return;
+  if(sel && sel.type==="army"){ const a=sel.a;
+    if(!ADJ[a.loc].has(p)){ clearSel(); return; }
+    if(a.blocked){ toast("Ta Armia nie może się ruszyć w tej turze."); return; }
+    const o=S.prov[p].owner, occupant=armyAt(p);
+    if(o===S.player && !occupant){ doMarch(a,p); }
+    else if(o!==S.player){ const g=attackGate(a,p); if(!g.ok){ toast(g.msg); return; } startBattle(a,p); }
+    else { toast("Tam już stoi twoja Armia."); }
+    return;
+  }
+  if(sel && sel.type==="card"){ tryIntrigueTarget(sel.card,sel.idx,{prov:p}); return; }
+}
+function onHandCard(c,i){
+  if(busy||S.order[S.cur]!==S.player||S.over){ toast("Nie twoja kolej."); return; }
+  const cd=CARDS[c];
+  if(sel&&sel.type==="card"&&sel.idx===i){ clearSel(); document.querySelectorAll(".hcard").forEach(e=>e.classList.remove("sel")); return; }
+  clearSel();
+  if(cd.t==="intryga"){ sel={type:"card",card:c,idx:i}; document.querySelectorAll(".hcard")[i].classList.add("sel"); promptIntrigue(c); }
+  else if(cd.t==="dowódca"||cd.t==="postać"||cd.t==="wzmocnienie"){
+    sel={type:"attach",card:c,idx:i}; document.querySelectorAll(".hcard")[i].classList.add("sel");
+    const kind = cd.t==="wzmocnienie"?"Wzmocnienie":(cd.t==="postać"?"Najemnika":"Dowódcę");
+    toast(`Kliknij swoją Armię, by dołączyć ${kind}: ${cd.n}.`+(cd.cost?` (koszt ${cd.cost} Złota)`:""));
+    [...T.querySelectorAll(".army.mine")].forEach(el=>el.classList.add("selectable"));
+    attachMode(c,i);
+  }
+  else if(cd.t==="specjalna"){ playSpecial(c); }
+  else { toast("Karty taktyczne (i reakcje) kładziesz zakryte w BITWIE, nie z ręki."); clearSel(); document.querySelectorAll(".hcard").forEach(e=>e.classList.remove("sel")); }
+}
+function attachMode(c,i){
+  const cd=CARDS[c];
+  const handler=(a)=>{
+    if(a.f!==S.player)return;
+    if(S.actions<=0){ toast("Brak akcji."); return; }
+    if(cd.t==="wzmocnienie"){
+      if(a.reinf.length>=2){ toast("Armia ma już 2 Wzmocnienia."); return; }
+      a.reinf.push(c); spendAction("Wzmocnienie: "+cd.n+" → "+a.name);
+    } else {
+      if(a.cmd){ toast("Ta Armia ma już Dowódcę."); return; }
+      if(cd.cost){ if(S.f[S.player].gold<cd.cost){ toast("Za mało Złota (potrzeba "+cd.cost+")."); return; } S.f[S.player].gold-=cd.cost; }
+      a.cmd=c; spendAction((cd.t==="postać"?"Najemnik: ":"Dowódca: ")+cd.n+" → "+a.name+(cd.cost?` (-${cd.cost} Złota)`:""));
+    }
+    S.f[S.player].hand.splice(i,1); fxPlay(c,S.player,armyXY(a.id)); hitSel('.army[data-id="'+a.id+'"]'); clearSel(); render();
+  };
+  reinfHandler=handler;
+}
+let reinfHandler=null;
+// hook army clicks for reinforcement
+const _onArmyClick=onArmyClick;
+onArmyClick=function(a){ if(reinfHandler){ let h=reinfHandler; reinfHandler=null; h(a); return; } _onArmyClick(a); };
+
+function promptIntrigue(c){
+  const cd=CARDS[c];
+  if(cd.eff==="bribe"){ showMsg(`<h2>${cd.n}</h2><p>${cd.d}</p><div class="opts">`+
+     alive().filter(k=>k!==S.player&&S.f[k].gold>0).map(k=>`<div class="opt" data-k="${k}"><b>${FACTIONS[k].short}</b> — ma ${S.f[k].gold} Złota</div>`).join("")+
+     `</div>`, el=>{ el.querySelectorAll(".opt").forEach(o=>o.onclick=()=>{ closeMsg(); doIntrigue(c,{faction:o.dataset.k}); }); }); }
+  else if(cd.eff==="nomove"){ let targets=S.armies.filter(a=>a.f!==S.player);
+     showMsg(`<h2>${cd.n}</h2><p>${cd.d}</p><div class="opts">`+targets.map(a=>`<div class="opt" data-id="${a.id}"><b>${a.name}</b> (${FACTIONS[a.f].short}) w ${PROV[a.loc].name}</div>`).join("")+`</div>`,
+       el=>el.querySelectorAll(".opt").forEach(o=>o.onclick=()=>{ closeMsg(); doIntrigue(c,{armyId:+o.dataset.id}); })); }
+  else if(cd.eff==="tearbanner"){ let myProvs=Object.keys(PROV).filter(p=>S.prov[p].owner===S.player);
+     let targets=Object.keys(PROV).filter(p=>{ let o=S.prov[p].owner; return o&&o!==S.player&&!armyAt(p)&&myProvs.some(mp=>ADJ[mp].has(p)); });
+     if(!targets.length){ toast("Brak celu: potrzebna wroga prowincja bez Armii, sąsiadująca z twoją."); clearSel(); document.querySelectorAll(".hcard").forEach(e=>e.classList.remove("sel")); return; }
+     showMsg(`<h2>${cd.n}</h2><p>${cd.d}</p><div class="opts">`+targets.map(p=>`<div class="opt" data-p="${p}"><b>${PROV[p].name}</b> (${FACTIONS[S.prov[p].owner].short})</div>`).join("")+`</div>`,
+       el=>el.querySelectorAll(".opt").forEach(o=>o.onclick=()=>{ closeMsg(); doIntrigue(c,{prov:o.dataset.p}); })); }
+  else if(cd.eff==="sabotage"){ let targets=Object.keys(PROV).filter(p=>S.prov[p].owner&&S.prov[p].owner!==S.player);
+     if(!targets.length){ toast("Brak wrogiej prowincji do sabotażu."); clearSel(); document.querySelectorAll(".hcard").forEach(e=>e.classList.remove("sel")); return; }
+     showMsg(`<h2>${cd.n}</h2><p>${cd.d}</p><div class="opts">`+targets.map(p=>`<div class="opt" data-p="${p}"><b>${PROV[p].name}</b> (${FACTIONS[S.prov[p].owner].short}, Obrona ${effDef(p)})</div>`).join("")+`</div>`,
+       el=>el.querySelectorAll(".opt").forEach(o=>o.onclick=()=>{ closeMsg(); doIntrigue(c,{prov:o.dataset.p}); })); }
+  else if(cd.eff==="spy"){ let targets=alive().filter(k=>k!==S.player);
+     showMsg(`<h2>${cd.n}</h2><p>${cd.d}</p><div class="opts">`+targets.map(k=>`<div class="opt" data-k="${k}"><b>${FACTIONS[k].short}</b> — ${S.f[k].hand.length} kart na ręce</div>`).join("")+`</div>`,
+       el=>el.querySelectorAll(".opt").forEach(o=>o.onclick=()=>{ closeMsg(); doIntrigue(c,{faction:o.dataset.k}); })); }
+  else { toast("Tej karty użyjesz w bitwie."); clearSel(); document.querySelectorAll(".hcard").forEach(e=>e.classList.remove("sel")); }
+}
+function doIntrigue(c,tgt){
+  if(S.actions<=0){ toast("Brak akcji."); return; }
+  const cd=CARDS[c]; const g0=S.f[S.player].gold, gl0=S.f[S.player].glory; const i=S.f[S.player].hand.indexOf(c); if(i>=0)S.f[S.player].hand.splice(i,1);
+  if(cd.eff==="bribe"){ let k=tgt.faction; let amt=Math.min(2,S.f[k].gold); S.f[k].gold-=amt; S.f[S.player].gold+=amt; talk(S.player,`Sięgam ${FACTIONS[k].short} do sakiewki. -${amt} Złota.`); }
+  if(cd.eff==="nomove"){ let a=armyById(tgt.armyId); if(a){a.blocked=true; talk(S.player,`Gdzie ta mapa?! ${a.name} (${FACTIONS[a.f].short}) nigdzie nie idzie w następnej turze.`);} }
+  if(cd.eff==="tearbanner"){ let p=tgt.prov; let o=S.prov[p].owner; S.prov[p].owner=null; talk(S.player,`Zrywam sztandar ${FACTIONS[o].short} z ${PROV[p].name}!`); }
+  if(cd.eff==="sabotage"){ let p=tgt.prov; S.prov[p].wallBonus=(S.prov[p].wallBonus||0)-1; talk(S.player,`Sabotuję mury ${PROV[p].name} — Obrona spada na stałe.`); }
+  if(cd.eff==="spy"){ let k=tgt.faction; let names=S.f[k].hand.map(x=>CARDS[x]?CARDS[x].n:x).join(", ")||"(pusta ręka)"; talkSys(`🔍 Szpieg donosi: ręka ${FACTIONS[k].short} — ${names}.`); }
+  const to = tgt.prov?provXY(tgt.prov):(tgt.armyId?armyXY(tgt.armyId):null); fxPlay(c,S.player,to); if(tgt.prov)hitSel('.prov[data-p="'+tgt.prov+'"]');
+  spendAction("Intryga: "+cd.n); clearSel(); render(); floatDelta(S.player,g0,gl0);
+}
+function tryIntrigueTarget(c,i,t){ /* provinces handled in promptIntrigue */ }
+function playSpecial(c){
+  if(S.actions<=0){ toast("Brak akcji."); clearSel(); return; }
+  const cd=CARDS[c], f=S.f[S.player]; const g0=f.gold, gl0=f.glory;
+  const consume=()=>{ let i=f.hand.indexOf(c); if(i>=0)f.hand.splice(i,1); fxPlay(c,S.player,[innerWidth*0.5,innerHeight*0.42]); hitSel(".mat"); spendAction("Karta specjalna: "+cd.n); clearSel(); render(); floatDelta(S.player,g0,gl0); };
+  switch(cd.eff){
+    case "draw1": draw(S.player); talk(S.player,cd.n+": dobieram kartę."); consume(); break;
+    case "draw2": draw(S.player);draw(S.player); talk(S.player,cd.n+": dobieram 2 karty."); consume(); break;
+    case "gold1": f.gold++; talk(S.player,cd.n+": +1 Złota."); consume(); break;
+    case "gold2": f.gold+=2; talk(S.player,cd.n+": +2 Złota z łupu!"); consume(); break;
+    case "glory1": f.glory++; talk(S.player,cd.n+": +1 Chwały."); consume(); break;
+    case "gold1draw1": f.gold++; draw(S.player); talk(S.player,cd.n+": +1 Złota i karta."); consume(); break;
+    case "skarbiec": if(f.gold<=0){ draw(S.player);draw(S.player);draw(S.player); talk(S.player,"Skarbiec pusty — desperacko dobieram 3 karty!"); } else { f.gold--; draw(S.player);draw(S.player); talk(S.player,"-1 Złota, +2 karty."); } consume(); break;
+    case "endinterregnum": if(f.interregnum){ f.ruler=BASIC_RULER[S.player]; f.interregnum=false; talkSys(`👑 NOWY CESARZ! ${FACTIONS[S.player].short} kończy Bezkrólewie — ${rulerName(f.ruler)} na tronie.`); consume(); } else { toast("Ta karta działa tylko w Bezkrólewiu."); clearSel(); } break;
+    case "wallprov": { let mine=Object.keys(PROV).filter(p=>S.prov[p].owner===S.player); if(!mine.length){ toast("Brak własnej Prowincji."); clearSel(); return; }
+      showMsg(`<h2>${cd.n}</h2><p>${cd.d}</p><div class="opts">`+mine.map(p=>`<div class="opt" data-p="${p}"><b>${PROV[p].name}</b> (Obrona ${effDef(p)})</div>`).join("")+`<div class="opt" id="c">Anuluj</div></div>`,
+        el=>{ el.querySelectorAll(".opt[data-p]").forEach(o=>o.onclick=()=>{ closeMsg(); let p=o.dataset.p; S.prov[p].wallBonus=(S.prov[p].wallBonus||0)+2; talk(S.player,`${PROV[p].name}: +2 Obrony na stałe.`); consume(); }); el.querySelector("#c").onclick=()=>{closeMsg();clearSel();render();}; }); break; }
+    default: draw(S.player); consume();
+  }
+}
+
+function doMarch(a,p){
+  if(S.actions<=0){ toast("Brak akcji."); return; }
+  // occupy empty (own or neutral)
+  a.loc=p; a.moved=true;
+  if(!S.prov[p].owner || S.prov[p].owner!==a.f){ // claim neutral, plant banner
+    if(!S.prov[p].owner){ S.prov[p].owner=a.f; S.prov[p].spoiled=false; talk(a.f,`Wkraczamy do ${PROV[p].name} — nasz sztandar, nasza ziemia.`); }
+  }
+  if(a.f==="goths"){ /* march without conquest breaks streak handled per turn */ }
+  spendAction("Marsz → "+PROV[p].name); clearSel(); render();
+}
+function spendAction(label){ S.actions--; talkSys(`${FACTIONS[S.player]?FACTIONS[S.order[S.cur]].short:""}: ${label} (zostało ${S.actions})`); if(S.actions<=0){ toast("Koniec akcji — zakończ turę pieczęcią."); } }
+
+/* recruit via double-click on your own province */
+T.addEventListener("click",()=>{ if(expandedEnemy){ expandedEnemy=null; renderEnemies(); } });
+T.addEventListener("dblclick",e=>{ if(busy||S.order[S.cur]!==S.player)return; let pe=e.target.closest(".prov"); if(!pe)return;
+  let p=pe.dataset.p; if(S.prov[p].owner!==S.player)return; tryRecruit(p); });
+function tryRecruit(p){
+  const f=S.f[S.player]; const cap=S.player==="gauls"?4:3; const cost=S.player==="gauls"?4:5;
+  if(S.noRecruit){ toast("Ostra zima — w tej rundzie bez rekrutacji."); return; }
+  if(S.actions<=0){ toast("Brak akcji."); return; }
+  if(armiesOf(S.player).length>=cap){ toast("Masz już maksymalną liczbę Armii ("+cap+")."); return; }
+  if(f.gold<cost){ toast("Za mało Złota (potrzeba "+cost+")."); return; }
+  if(armyAt(p)){ toast("Na tej prowincji już stoi Armia."); return; }
+  f.gold-=cost; addArmy(S.player,p,"Nowa Armia "+FACTIONS[S.player].short); talk(S.player,`Nowy zaciąg w ${PROV[p].name}. -${cost} Złota.`);
+  spendAction("Rekrutacja w "+PROV[p].name); render();
+}
+
+/* ===================== DRAG ===================== */
+function makeDraggable(el,a){
+  let sx,sy,ox,oy,drag=false;
+  el.addEventListener("mousedown",e=>{ if(busy||S.order[S.cur]!==S.player||S.over)return; e.preventDefault();
+    sx=e.clientX; sy=e.clientY; drag=true; el.dataset.dragged="";
+    ox=parseFloat(el.style.left); oy=parseFloat(el.style.top);
+    if(!sel||sel.type!=="army"||sel.a.id!==a.id){ onArmyClick(a); }
+    const mm=ev=>{ let dx=ev.clientX-sx,dy=ev.clientY-sy; if(Math.abs(dx)+Math.abs(dy)>5){el.classList.add("dragging");el.dataset.dragged="1";}
+      el.style.left=(ox+dx/T.clientWidth*100)+"%"; el.style.top=(oy+dy/T.clientHeight*100)+"%"; };
+    const mu=ev=>{ document.removeEventListener("mousemove",mm); document.removeEventListener("mouseup",mu); el.classList.remove("dragging");
+      if(el.dataset.dragged==="1"){ let tp=provUnder(ev.clientX,ev.clientY); if(tp&&ADJ[a.loc].has(tp)){ onProv(tp); } else { render(); } }
+      setTimeout(()=>{delete el.dataset.dragged;},50); };
+    document.addEventListener("mousemove",mm); document.addEventListener("mouseup",mu);
+  });
+}
+function provUnder(x,y){ let best=null,bd=1e9; for(const p in PROV){ let el=[...T.querySelectorAll(".prov")].find(e=>e.dataset.p===p); if(!el)continue;
+   let r=el.getBoundingClientRect(); let cx=r.left+r.width/2,cy=r.top+r.height/2; let d=(cx-x)**2+(cy-y)**2; if(d<bd){bd=d;best=p;} } return bd<20000?best:null; }
+
+/* ===================== BITWA ===================== */
+function startBattle(army,prov){
+  const defFac=S.prov[prov].owner; const defArmy=armyAt(prov);
+  battle={ attF:army.f, attArmy:army, defF:defFac, defArmy:defArmy||null, prov,
+    attCards:[], defCards:[], supports:[], attReinfShown:false, phase:"nego", negoLog:[], playerSide: army.f===S.player?"att":"def",
+    aiDecided:false };
+  openBattleUI();
+  // if defender is AI, get its opening stance
+  if(defFac && defFac!==S.player) requestBattleAI("open");
+  else if(defFac===S.player){ /* handled elsewhere for AI attacks */ }
+  else { battle.aiDecided=true; renderBattleUI(); } // neutral province, no defender talk
+}
+function armyEff(a,attacking,targetOwner,cards,extraSupport){
+  let s=armyStr(a)+cmdBonus(a,attacking,targetOwner);
+  let negc=cards.some(c=>CARDS[c]&&CARDS[c].eff==="negcmd");
+  // opponent negcmd handled by caller
+  cards.forEach(c=>{ const e=CARDS[c]&&CARDS[c].eff;
+    if(e==="str2")s+=2; if(e==="atk2"&&attacking)s+=2; if(e==="def3"&&!attacking)s+=3; });
+  return s;
+}
+function computeBattle(){
+  const b=battle;
+  const targetOwner=b.defF;
+  // negate commander
+  const attNeg=b.defCards.some(c=>CARDS[c]&&CARDS[c].eff==="negcmd");
+  const defNeg=b.attCards.some(c=>CARDS[c]&&CARDS[c].eff==="negcmd");
+  let att = armyStr(b.attArmy) + (defNeg?0:cmdBonus(b.attArmy,true,targetOwner)) + reinfBonus(b.attArmy,true,b.prov);
+  b.attCards.forEach(c=>{const e=CARDS[c]&&CARDS[c].eff; if(e==="str2")att+=2; if(e==="atk2")att+=2; if(e==="str3")att+=3; if(e==="punish"&&b.defCards.length===0)att+=3;});
+  let def;
+  if(b.defArmy){ def=armyStr(b.defArmy)+(attNeg?0:cmdBonus(b.defArmy,false,null))+reinfBonus(b.defArmy,false,b.prov); }
+  else def=effDef(b.prov);
+  b.defCards.forEach(c=>{const e=CARDS[c]&&CARDS[c].eff; if(e==="str2")def+=2; if(e==="def3")def+=3; if(e==="wall2")def+=2; if(e==="str3")def+=3; if(e==="punish"&&b.attCards.length===0)def+=3;});
+  // supports
+  b.supports.forEach(s=>{ const e=CARDS[s.card]&&CARDS[s.card].eff; let val=0;
+    if(e==="false") val=-2; else if(e==="str2"||e==="atk2"||e==="def3") val=2; else if(e==="wall2")val=2; else val=1; // generic help
+    if(e==="bluff")val=0;
+    if(s.side==="att") att+= (e==="false"? -2: val); else def+= (e==="false"? -2: val);
+  });
+  // betray card
+  b.attCards.forEach(c=>{ if(CARDS[c]&&CARDS[c].eff==="betray") att+=3; });
+  // ZAMKNĄĆ BRAMĘ! — obrona +2 (+1 w Italii)
+  b.defCards.forEach(c=>{ if(CARDS[c]&&CARDS[c].eff==="zamknij"){ def+=2; if(b.prov==="italia")def+=1; } });
+  // ZA CESARZA! — +2 jeśli grająca strona ma Władcę (nie w Bezkrólewiu)
+  b.attCards.forEach(c=>{ if(CARDS[c]&&CARDS[c].eff==="rulerbonus" && S.f[b.attF].ruler && !S.f[b.attF].interregnum) att+=2; });
+  if(b.defF) b.defCards.forEach(c=>{ if(CARDS[c]&&CARDS[c].eff==="rulerbonus" && S.f[b.defF].ruler && !S.f[b.defF].interregnum) def+=2; });
+  // ANULUJ TAKTYKĘ (enemyminus2) — karta osłabia stronę przeciwną
+  b.attCards.forEach(c=>{ if(CARDS[c]&&CARDS[c].eff==="enemyminus2") def-=2; });
+  b.defCards.forEach(c=>{ if(CARDS[c]&&CARDS[c].eff==="enemyminus2") att-=2; });
+  // PUŁAPKA — karze przepakowanie: obrońca z pułapką + atakujący z 2 zakrytymi kartami → atak -4
+  if(b.defCards.some(c=>CARDS[c]&&CARDS[c].eff==="trap") && b.attCards.length>=2) att-=4;
+  // Władca osobiście na polu bitwy: +1 Siły
+  if(b.attArmy.rulerLed) att+=1;
+  if(b.defArmy && b.defArmy.rulerLed) def+=1;
+  return {att:Math.max(0,att),def:Math.max(0,def)};
+}
+function openBattleUI(){ document.getElementById("battleVeil").classList.add("on"); renderBattleUI(); }
+function closeBattleUI(){ document.getElementById("battleVeil").classList.remove("on"); battle=null; render(); }
+function miniCard(c,revealed){ if(!revealed) return `<div class="mini">zakryta</div>`;
+  const cd=CARDS[c]; return `<div class="mini rev"><div><div class="mn">${cd.n}</div><div class="me">${cd.d}</div></div></div>`; }
+function renderBattleUI(){
+  const b=battle; if(!b) return;
+  const el=document.getElementById("battle");
+  const playerAtt=b.playerSide==="att";
+  const reveal=b.phase==="reveal"||b.phase==="done";
+  const {att,def}=computeBattle();
+  const attSlots=[0,1].map(i=>`<div class="slot">${b.attCards[i]!==undefined?miniCard(b.attCards[i],reveal||b.playerSide==="att"):(playerAtt?"upuść kartę":"")}</div>`).join("");
+  const defSlots=[0,1].map(i=>`<div class="slot">${b.defCards[i]!==undefined?miniCard(b.defCards[i],reveal||b.playerSide==="def"):(!playerAtt?"upuść kartę":"")}</div>`).join("");
+  const supTxt=b.supports.map(s=>`${FACTIONS[s.f].short} wspiera ${s.side==="att"?"atak":"obronę"}${reveal?": "+CARDS[s.card].n:" (zakryta)"}`).join("<br>")||"";
+  el.innerHTML=`<h2>BITWA O ${PROV[b.prov].name.toUpperCase()}</h2>
+   <div class="bsub">${FACTIONS[b.attF].short} atakuje ${b.defF?FACTIONS[b.defF].short:"ziemię niczyją"} • Obrona bazowa ${effDef(b.prov)}</div>
+   <div class="battlefield">
+     <div class="side"><h3><span class="disc" style="width:11px;height:11px;background:${FACTIONS[b.attF].color}"></span> Atakujący: ${b.attArmy.name}</h3>
+       <div class="est">Siła ${reveal?"= "+att:"bazowa "+armyStr(b.attArmy)}${b.attArmy.cmd&&reveal?"":""}</div>
+       <div class="slots">${attSlots}</div></div>
+     <div class="vs">⚔</div>
+     <div class="side"><h3>Obrońca: ${b.defArmy?b.defArmy.name:PROV[b.prov].name}</h3>
+       <div class="est">Siła ${reveal?"= "+def:(b.defArmy?"bazowa "+armyStr(b.defArmy):"Obrona "+effDef(b.prov))}</div>
+       <div class="slots">${defSlots}</div></div>
+   </div>
+   ${supTxt?`<div class="bsub">${supTxt}</div>`:""}
+   <div id="nego"><div class="nlog" id="nlog">${b.negoLog.map(l=>`<div class="tk"><span class="who" style="color:${l.color||'#3a2c18'}">${l.who}:</span> <span class="say">${l.txt}</span></div>`).join("")||'<div class="tk sys">Zagadaj do stołu — obiecuj, strasz, przekupuj. Potem połóż karty i uderz.</div>'}</div>
+     ${b.phase!=="done"?`<div class="nrow"><input id="negoInput" placeholder="Powiedz coś do stołu (obietnica, groźba, blef)..." ${busy?"disabled":""}><button class="btn ghost" id="negoSend" ${busy?"disabled":""}>Powiedz</button></div>`:""}
+   </div>
+   ${b.phase!=="done"?`<div class="hint" id="bhint">Połóż do 2 kart zakrytych — przepadną po odkryciu, także blefy! Potem „DO BOJU!".</div>
+   <div class="bhand" id="bhand"></div>`:""}
+   <div class="bactions">
+     ${b.phase==="nego"?`<button class="btn" id="fight">⚔ DO BOJU! (odkryj)</button>`:""}
+     ${b.phase==="nego"&&b.playerSide==="att"?`<button class="btn ghost" id="cancelB">Wycofaj się (odzyskaj karty)</button>`:""}
+     ${b.phase==="nego"&&b.playerSide==="att"&&b.ransomOffer>0?`<button class="btn" id="takeRansom" style="background:radial-gradient(circle at 40% 35%,#b8860b,#8a6508)">💰 Przyjmij okup: ${b.ransomOffer} Złota</button>`:""}
+     ${b.phase==="nego"&&b.playerSide==="def"?`<span style="display:inline-flex;gap:5px;align-items:center;background:rgba(246,239,221,.7);padding:4px 8px;border-radius:5px;border:1px solid #b7a57e"><input id="ransomAmt" type="number" min="1" max="${S.f[S.player].gold}" value="1" style="width:52px;font-family:'Special Elite';padding:4px;border:1px solid #a8946c;border-radius:4px;background:#f6efdd"><button class="btn ghost" id="offerRansom">💰 Zaproponuj okup</button></span>`:""}
+     ${b.phase==="reveal"?`<button class="btn" id="cont">Dalej</button>`:""}
+     ${b.phase==="done"?`<button class="btn" id="finish">Zamknij</button>`:""}
+   </div>`;
+  // player's battle hand
+  if(b.phase!=="done"){ const bh=el.querySelector("#bhand"); const mine=S.f[S.player];
+    const myCards = mine.hand;
+    const chosen = b.playerSide==="att"?b.attCards:b.defCards;
+    myCards.forEach((c,i)=>{ const cd=CARDS[c]; if(!(cd.t==="taktyka"||cd.t==="reakcja"||cd.eff==="betray")) return;
+      let d=document.createElement("div"); d.className="hcard type-"+cd.t+(b._picked&&b._picked.includes(i)?" sel":"");
+      d.innerHTML=`<div class="hn">${cd.n}</div><div class="ht">${cd.d}</div><div class="htype">${cd.t}</div>`;
+      d.onclick=()=>pickBattleCard(i); bh.appendChild(d);
+    });
+  }
+  el.querySelector("#fight")&&(el.querySelector("#fight").onclick=doFight);
+  el.querySelector("#cont")&&(el.querySelector("#cont").onclick=()=>{ resolveBattleOutcome(); });
+  el.querySelector("#finish")&&(el.querySelector("#finish").onclick=closeBattleUI);
+  el.querySelector("#cancelB")&&(el.querySelector("#cancelB").onclick=withdrawAttack);
+  el.querySelector("#takeRansom")&&(el.querySelector("#takeRansom").onclick=acceptAIRansom);
+  el.querySelector("#offerRansom")&&(el.querySelector("#offerRansom").onclick=offerRansomToAI);
+  const send=el.querySelector("#negoSend"); if(send){ send.onclick=sendNego; el.querySelector("#negoInput").addEventListener("keydown",e=>{if(e.key==="Enter")sendNego();}); }
+}
+let _pickIdx=[];
+function pickBattleCard(i){ const b=battle; if(!b) return; b._picked=b._picked||[];
+  const side = b.playerSide==="att"?b.attCards:b.defCards;
+  const pos=b._picked.indexOf(i);
+  if(pos>=0){ b._picked.splice(pos,1); } else { if(b._picked.length>=2){ toast("Maks 2 karty."); return; } b._picked.push(i); }
+  // rebuild chosen card list from picked (store keys)
+  renderBattleUI();
+}
+function sendNego(){
+  const inp=document.getElementById("negoInput"); if(!inp)return; const t=inp.value.trim(); if(!t)return;
+  battle.negoLog.push({who:FACTIONS[S.player].short+" (Ty)",txt:t,color:FACTIONS[S.player].raw});
+  inp.value=""; renderBattleUI();
+  requestBattleAI("reply",t);
+}
+function doFight(){
+  const b=battle;
+  // commit player's picked cards
+  b._picked=b._picked||[];
+  const picks=b._picked.map(i=>S.f[S.player].hand[i]).filter(Boolean);
+  // remove from hand (descending)
+  b._picked.slice().sort((a,c)=>c-a).forEach(i=>S.f[S.player].hand.splice(i,1));
+  if(b.playerSide==="att") b.attCards.push(...picks); else b.defCards.push(...picks);
+  // ensure AI decided its cards
+  if(!b.aiDecided){ requestBattleAI("final",null,()=>{ b.phase="reveal"; renderBattleUI(); }); return; }
+  b.phase="reveal"; renderBattleUI();
+}
+function resolveBattleOutcome(){
+  const b=battle; const {att,def}=computeBattle();
+  // animacja odkrytych kart
+  try{
+    if(b.playerSide===null){ // bitwa AI vs AI/neutral — pokaż na mapie
+      const xy=provXY(b.prov)||[innerWidth/2,innerHeight/2];
+      b.attCards.forEach((c,i)=>throwCard(c,{who:FACTIONS[b.attF].short,color:FACTIONS[b.attF].raw,to:[xy[0]-26+i*22,xy[1]-26],from:[innerWidth*0.93,innerHeight*0.8]}));
+      if(b.defF)b.defCards.forEach((c,i)=>throwCard(c,{who:FACTIONS[b.defF].short,color:FACTIONS[b.defF].raw,to:[xy[0]+18+i*22,xy[1]+14],from:[innerWidth*0.93,innerHeight*0.8]}));
+      hitSel('.prov[data-p="'+b.prov+'"]'); pulseAt(xy[0],xy[1]);
+    } else { pulseAt(innerWidth/2,innerHeight*0.34); [...document.querySelectorAll('#battle .slot')].forEach(s=>{s.classList.remove('fx-hit');void s.offsetWidth;s.classList.add('fx-hit');}); }
+  }catch(e){}
+  // retreat card
+  const attRetreat=b.attCards.some(c=>CARDS[c]&&CARDS[c].eff==="retreat");
+  let attackerWins = att>def;
+  let log="";
+  if(!attackerWins && attRetreat){ talkSys(`${FACTIONS[b.attF].short}: „To był tylko zwiad!" — ${b.attArmy.name} wycofuje się bez strat.`); b.phase="done"; b.result="Zwiad."; finishBattleState(); return; }
+  if(attackerWins){
+    // Vandals sack option
+    const conquer=()=>{
+      const defRulerLed = b.defArmy && b.defArmy.rulerLed;
+      // remove defender army
+      if(b.defArmy){ S.armies=S.armies.filter(x=>x.id!==b.defArmy.id); }
+      const oldOwner=b.defF;
+      b.attArmy.loc=b.prov; b.attArmy.moved=true; S.prov[b.prov].owner=b.attF; S.prov[b.prov].spoiled=false; S.prov[b.prov].wallBonus=0;
+      const big=(att-def)>=3; let gain=big?2:1;
+      if(b.attF==="goths"){ S.f.goths.streak++; gain=Math.min(4,S.f.goths.streak)+(big?1:0); }
+      let rulerWin = b.attArmy.rulerLed; S.f[b.attF].glory+=gain+(rulerWin?1:0); S.f[b.attF].conqThisTurn=true;
+      let wozy = b.attArmy.reinf && b.attArmy.reinf.some(r=>CARDS[r]&&CARDS[r].onConq); if(wozy) S.f[b.attF].glory+=1;
+      b.result=`${FACTIONS[b.attF].short} zdobywa ${PROV[b.prov].name}! +${gain+(wozy?1:0)+(rulerWin?1:0)} Chwały${b.attF==="goths"&&S.f.goths.streak>=2?" (seria ×"+S.f.goths.streak+")":""}${big?" — miażdżące zwycięstwo!":""}${rulerWin?" 👑 pod wodzą Władcy":""}${wozy?" +wozy":""}.`;
+      if(defRulerLed) rulerDeathTest(b.defF, null);
+    };
+    if(b.attF==="vandals" && b.defF){ // choose
+      if(b.attF===S.player){ b.phase="done"; b.result="Zwycięstwo! Wybierz: zająć czy złupić."; finishBattleState(true); return; }
+      else { // AI vandals: decide via simple heuristic (sack rich targets)
+        if(b.prov==="italia"||provCount("vandals")>=3){ doSack(); } else { conquer(); }
+        b.phase="done"; finishBattleState(); return;
+      }
+    }
+    conquer(); b.phase="done"; finishBattleState();
+  } else {
+    // obrońca utrzymuje; atakujący zostaje, ale Armia zmęczona (zablokowana do końca rundy)
+    if(b.defF){ S.f[b.defF].glory+=1; }
+    b.attArmy.moved=true; b.attArmy.blocked=true;
+    b.result=`${b.defF?FACTIONS[b.defF].short:"Obrońcy"} utrzymują ${PROV[b.prov].name}. Atak odparty${b.defF?" (+1 Chwały)":""} — ${b.attArmy.name} zmęczona do końca rundy.`;
+    if(b.attF==="goths") S.f.goths.streak=0;
+    if(b.attArmy.rulerLed) rulerDeathTest(b.attF, b.attArmy);
+    else if(b.attArmy.cmd && d6()===1){ talkSys(`💀 Dowódca ${cmdName(b.attArmy.cmd)} ginie w klęsce pod ${PROV[b.prov].name}!`); b.attArmy.cmd=null; }
+    b.phase="done"; finishBattleState();
+  }
+}
+function doSack(){ const b=battle; const defRulerLed=b.defArmy&&b.defArmy.rulerLed;
+  if(b.defArmy){ S.armies=S.armies.filter(x=>x.id!==b.defArmy.id); }
+  if(defRulerLed) rulerDeathTest(b.defF, null);
+  S.prov[b.prov].owner=null; S.prov[b.prov].spoiled=true; S.prov[b.prov].wallBonus=0;
+  S.f.vandals.gold+=2; S.f.vandals.glory+=2; if(b.prov==="italia"){S.f.vandals.gold+=2;S.f.vandals.glory+=2;}
+  if(b.attArmy&&b.attArmy.cmd==="genzeryk"){ S.f.vandals.gold+=1; }
+  b.attArmy.moved=true; b.result=`Wandalowie ŁUPIĄ ${PROV[b.prov].name} i ruszają dalej. +${b.prov==="italia"?4:2} Złota, +${b.prov==="italia"?4:2} Chwały.${b.prov==="italia"?" WAKACJE W RZYMIE!":""}`;
+}
+function finishBattleState(sackChoice){
+  const b=battle; talkSys(b.result);
+  if(sackChoice){ // show sack/hold buttons for player vandals
+    const el=document.getElementById("battle");
+    el.querySelector(".bactions").innerHTML=`<button class="btn" id="hold">Zająć ziemię</button><button class="btn ghost" id="sack">🔥 ZŁUPIĆ (WAKACJE W RZYMIE)</button>`;
+    el.querySelector("#hold").onclick=()=>{ if(b.defArmy)S.armies=S.armies.filter(x=>x.id!==b.defArmy.id); b.attArmy.loc=b.prov;b.attArmy.moved=true;S.prov[b.prov].owner="vandals";S.prov[b.prov].spoiled=false;S.f.vandals.glory+=1;S.f.vandals.conqThisTurn=true; talkSys(`Wandalowie zajmują ${PROV[b.prov].name}. +1 Chwały.`); afterBattle(); };
+    el.querySelector("#sack").onclick=()=>{ doSack(); talkSys(b.result); afterBattle(); };
+    return;
+  }
+  renderBattleUI();
+  // spend the action now
+}
+function afterBattle(){ // called after player vandal choice
+  battle.phase="done"; renderBattleUI();
+}
+// when battle fully closed by player -> spend action
+const _closeBattleUI=closeBattleUI;
+closeBattleUI=function(){ const wasAtt=battle&&battle.attF===S.player; document.getElementById("battleVeil").classList.remove("on");
+  let b=battle; battle=null;
+  if(wasAtt){ S.actions--; talkSys(`Zostało akcji: ${S.actions}`); if(S.actions<=0)toast("Koniec akcji — zakończ turę."); }
+  render();
+  if(b&&b._afterAI) b._afterAI();
+};
+
+/* ---- OKUP / WYCOFANIE (off-ramp) ---- */
+function returnBattleCards(){ const b=battle; if(!b)return;
+  (b.attCards||[]).forEach(c=>{ if(S.f[b.attF])S.f[b.attF].hand.push(c); });
+  if(b.defF)(b.defCards||[]).forEach(c=>{ if(S.f[b.defF])S.f[b.defF].hand.push(c); });
+  (b.supports||[]).forEach(s=>{ if(S.f[s.f])S.f[s.f].hand.push(s.card); });
+  b.attCards=[]; b.defCards=[]; b.supports=[];
+}
+function withdrawAttack(){ const b=battle; returnBattleCards();
+  talkSys(`${FACTIONS[b.attF].short} wycofuje się spod ${PROV[b.prov].name} — bez strat, ale tura zmarnowana.`);
+  closeBattleUI();
+}
+function acceptAIRansom(){ const b=battle; const amt=Math.min(b.ransomOffer||0, S.f[b.defF].gold);
+  S.f[b.defF].gold-=amt; S.f[b.attF].gold+=amt; returnBattleCards();
+  talkSys(`💰 ${FACTIONS[b.defF].short} płaci ${amt} Złota okupu — ${FACTIONS[b.attF].short} zawraca spod ${PROV[b.prov].name}.`);
+  closeBattleUI();
+}
+async function offerRansomToAI(){ const b=battle; const inp=document.getElementById("ransomAmt");
+  let amt=Math.max(1,Math.min(parseInt(inp&&inp.value)||1, S.f[S.player].gold));
+  if(S.f[S.player].gold<1){ toast("Nie masz Złota na okup."); return; }
+  busy=true; b.negoLog.push({who:FACTIONS[S.player].short+" (Ty)",txt:`Dam ci ${amt} Złota, żebyś sobie poszedł.`,color:FACTIONS[S.player].raw}); renderBattleUI();
+  const dec=await askRansomDecision(b.attF,amt);
+  b.negoLog.push({who:FACTIONS[b.attF].short,txt:dec.say||"...",color:FACTIONS[b.attF].raw});
+  if(dec.accept){ S.f[S.player].gold-=amt; S.f[b.attF].gold+=amt; returnBattleCards();
+    talkSys(`💰 ${FACTIONS[S.player].short} wykupuje się za ${amt} Złota — ${FACTIONS[b.attF].short} odchodzi spod ${PROV[b.prov].name}.`);
+    busy=false; closeBattleUI(); return; }
+  busy=false; renderBattleUI();
+}
+async function askRansomDecision(fk,amt){
+  const sys=`Jesteś ${FACTIONS[fk].name} (${FACTIONS[fk].persona}) i atakujesz ${PROV[battle.prov].name}. Obrońca (gracz) proponuje ${amt} Złota okupu, żebyś odwołał atak i sobie poszedł. Masz ${S.f[fk].gold} Złota. Oceń, czy realnie wygrałbyś tę bitwę, czy lepiej wziąć kasę bez ryzyka (pamiętaj: obrońca mógł blefować zakrytymi kartami). Odpowiedz TYLKO JSON: {"accept":true/false,"say":"jedno zdanie po polsku, w charakterze"}.`;
+  let r=await callLLM(sys, describeState(fk)); return parseJSON(r)||{accept:amt>=2, say:amt>=2?"Dawaj to złoto, mądra decyzja.":"Za tyle? Obrażasz mnie."};
+}
+
+/* ===================== AI: TURA ===================== */
+async function aiTurn(fk){
+  busy=true; render();
+  const persona=FACTIONS[fk].persona, mech=FACTIONS[fk].mech;
+  for(let step=0; step<3 && S.f[fk].alive; step++){
+    const state=describeState(fk);
+    const sys=`Jesteś graczem w humorystycznej, toksycznej grze strategicznej o Wędrówce Ludów ("Barbarzyńcy u Bram"). Grasz frakcją ${FACTIONS[fk].name}.
+TWÓJ CHARAKTER: ${persona}
+TWOJA MECHANIKA: ${mech}
+Cel gry: mieć najwięcej Chwały po 6 rundach. Zdobywasz ją podbojami, kontrolą regionów i zdolnościami frakcji.
+Masz do wykonania JEDNĄ akcję. Dostępne akcje (zwróć DOKŁADNIE jedną w polu "action"):
+- {"type":"attack","armyId":N,"to":"prowincja"} — atak na sąsiednią wrogą/niczyją prowincję
+- {"type":"march","armyId":N,"to":"prowincja"} — marsz na sąsiednią pustą (twoją lub niczyją) prowincję
+- {"type":"recruit","prov":"prowincja"} — nowa Armia na twojej prowincji (koszt Złota)
+- {"type":"reinforce","armyId":N,"card":"klucz_karty"} — dołącz kartę z ręki do Armii
+- {"type":"intrigue","card":"klucz_karty","target":{...}} — zagraj intrygę (bribe: target {"faction":"k"}, nomove: {"armyId":N}, tearbanner: {"prov":"p"})
+- {"type":"special","card":"klucz_karty"} — zagraj kartę SPECJALNĄ z ręki (dobór kart, Złoto, Chwała, koniec Bezkrólewia itp.)
+- {"type":"pass"} — nic nie rób
+Odpowiedz TYLKO obiektem JSON: {"table_talk":"jedno zdanie po polsku, w charakterze — możesz kłamać, grozić, obiecywać","action":{...}}. Bez komentarzy poza JSON.`;
+    const handDesc=S.f[fk].hand.map(k=>{const cd=CARDS[k];return cd?`${k} [${cd.t}] „${cd.n}" — ${cd.d}`:k;}).join("\n");
+    const usr=`STAN GRY (runda ${S.round}/6):\n${state}\nTWOJA RĘKA (klucz [typ] nazwa — efekt):\n${handDesc}\nTypy: dowódca/postać przypinasz przez "reinforce" (dają Siłę w bitwie; postać kosztuje Złoto); wzmocnienie też przez "reinforce"; intryga przez "intrigue"; taktyka/reakcja grasz TYLKO w bitwie (nie tu).\nWykonaj rozsądny ruch zgodny z charakterem.`;
+    let resp=await callLLM(sys,usr);
+    let obj=parseJSON(resp);
+    if(!obj){ obj={table_talk:"...",action:{type:"pass"}}; }
+    if(obj.table_talk) talk(fk,obj.table_talk);
+    render();
+    const ok=await execAIAction(fk,obj.action||{type:"pass"});
+    render();
+    if(obj.action && obj.action.type==="pass") break;
+    await sleep(500);
+  }
+  busy=false; render();
+}
+function describeState(fk){
+  let lines=[];
+  lines.push("PROWINCJE:");
+  for(const p in PROV){ const o=S.prov[p].owner; const a=armyAt(p);
+    lines.push(`- ${p} (${PROV[p].name}, Obrona ${effDef(p)}, region ${PROV[p].region}): ${o?"włada "+FACTIONS[o].short:(S.prov[p].spoiled?"SPUSTOSZONA":"niczyja")}${a?", stoi Armia #"+a.id+" "+FACTIONS[a.f].short+" (Siła "+armyStr(a)+")":""}. Sąsiedzi: ${[...ADJ[p]].join(", ")}`);
+  }
+  lines.push("\nTWOJE ARMIE:");
+  armiesOf(fk).forEach(a=>lines.push(`- #${a.id} ${a.name} w ${a.loc}, Siła ${armyStr(a)}${a.cmd?", Dowódca":""}, Wzmocnień ${a.reinf.length}/2${a.moved?", już się ruszyła":""}${a.blocked?", ZABLOKOWANA":""}`));
+  lines.push("\nFRAKCJE:");
+  alive().forEach(k=>lines.push(`- ${FACTIONS[k].short}: Chwała ${S.f[k].glory}, Złoto ${S.f[k].gold}, prowincji ${provCount(k)}${k===fk?" (TY)":""}`));
+  if(S.alliances.length){ lines.push("\nSOJUSZE:"); S.alliances.forEach(al=>lines.push(`- ${FACTIONS[al.a].short} + ${FACTIONS[al.b].short} (${al.treaty})`)); }
+  lines.push(`\n(Karty Wydarzeń są wtasowane w talie i odpalają się przy dobraniu.)`);
+  lines.push(`Koszt rekrutacji: ${fk==="gauls"?4:5} Złota, limit Armii ${fk==="gauls"?4:3}.`);
+  lines.push(`ATAK bramkowany Obroną: Obrona ≤3 dowolna Armia; 4-5 wymaga Przygotowanej (Dowódca lub Wzmocnienie); ≥6 wymaga Dowódcy albo 2 Wzmocnień.`);
+  return lines.join("\n");
+}
+async function execAIAction(fk,act){
+  try{
+    if(!act||!act.type||act.type==="pass") return false;
+    if(act.type==="march"){ let a=armyById(act.armyId); if(!a||a.f!==fk||a.blocked) return false; if(!ADJ[a.loc].has(act.to))return false;
+      const o=S.prov[act.to].owner,occ=armyAt(act.to); if(occ||o!==fk)return false; // marsz tylko po WŁASNYCH pustych; neutralne trzeba zdobyć bitwą
+      a.loc=act.to; a.moved=true; return true; }
+    if(act.type==="attack"){ let a=armyById(act.armyId); if(!a||a.f!==fk||a.blocked)return false; if(!ADJ[a.loc].has(act.to))return false;
+      const o=S.prov[act.to].owner,occ=armyAt(act.to); if(o===fk)return false;
+      if(occ&&occ.f===fk)return false;
+      if(!attackGate(a,act.to).ok) return false;
+      await aiBattle(a,act.to); return true; }
+    if(act.type==="recruit"){ const cap=fk==="gauls"?4:3,cost=fk==="gauls"?4:5;
+      if(S.noRecruit||S.prov[act.prov].owner!==fk||armiesOf(fk).length>=cap||S.f[fk].gold<cost||armyAt(act.prov))return false;
+      S.f[fk].gold-=cost; addArmy(fk,act.prov,"Nowa Armia "+FACTIONS[fk].short); return true; }
+    if(act.type==="reinforce"){ let a=armyById(act.armyId); if(!a||a.f!==fk)return false; let i=S.f[fk].hand.indexOf(act.card); if(i<0)return false; const cd=CARDS[act.card]; if(!cd)return false;
+      if(cd.t==="wzmocnienie"){ if(a.reinf.length>=2)return false; a.reinf.push(act.card); S.f[fk].hand.splice(i,1); fxPlay(act.card,fk,armyXY(a.id)); hitSel('.army[data-id="'+a.id+'"]'); return true; }
+      if(cd.t==="dowódca"||cd.t==="postać"){ if(a.cmd)return false; if(cd.cost){ if(S.f[fk].gold<cd.cost)return false; S.f[fk].gold-=cd.cost; } a.cmd=act.card; S.f[fk].hand.splice(i,1); fxPlay(act.card,fk,armyXY(a.id)); hitSel('.army[data-id="'+a.id+'"]'); return true; }
+      return false; }
+    if(act.type==="intrigue"){ let c=act.card,i=S.f[fk].hand.indexOf(c); if(i<0)return false; const cd=CARDS[c]; if(!cd)return false;
+      const t=act.target||{}; const fx=()=>{ const to=t.prov?provXY(t.prov):(t.armyId?armyXY(t.armyId):null); fxPlay(c,fk,to); if(t.prov)hitSel('.prov[data-p="'+t.prov+'"]'); };
+      if(cd.eff==="bribe"&&t.faction&&S.f[t.faction]){ let amt=Math.min(2,S.f[t.faction].gold);S.f[t.faction].gold-=amt;S.f[fk].gold+=amt;S.f[fk].hand.splice(i,1);fx(); if(amt>0){const cx=matXY(fk)||_rc(document.querySelector('#enemies .echip[data-k="'+fk+'"]'));if(cx)floatGain("+"+amt+" 💰",cx,"#b8860b"); const tx=matXY(t.faction)||_rc(document.querySelector('#enemies .echip[data-k="'+t.faction+'"]'));if(tx)floatGain("-"+amt+" 💰",tx,"#8a2b22");} return true; }
+      if(cd.eff==="nomove"&&t.armyId){ let a=armyById(t.armyId); if(a&&a.f!==fk){a.blocked=true;S.f[fk].hand.splice(i,1);fx();return true;} }
+      if(cd.eff==="tearbanner"&&t.prov){ let p=t.prov; if(S.prov[p].owner&&S.prov[p].owner!==fk&&!armyAt(p)&&[...ADJ[p]].some(n=>S.prov[n].owner===fk)){S.prov[p].owner=null;S.f[fk].hand.splice(i,1);fx();return true;} }
+      if(cd.eff==="sabotage"&&t.prov&&S.prov[t.prov]&&S.prov[t.prov].owner&&S.prov[t.prov].owner!==fk){ S.prov[t.prov].wallBonus=(S.prov[t.prov].wallBonus||0)-1; S.f[fk].hand.splice(i,1); fx(); return true; }
+      if(cd.eff==="spy"&&t.faction&&S.f[t.faction]){ S.f[fk].hand.splice(i,1); fxPlay(c,fk,null); return true; }
+      return false; }
+    if(act.type==="special"){ let c=act.card,i=S.f[fk].hand.indexOf(c); if(i<0)return false; const cd=CARDS[c]; if(!cd||cd.t!=="specjalna")return false; const f=S.f[fk]; const _g0=f.gold,_gl0=f.glory;
+      const e=cd.eff;
+      if(e==="draw1")draw(fk); else if(e==="draw2"){draw(fk);draw(fk);} else if(e==="gold1")f.gold++; else if(e==="gold2")f.gold+=2; else if(e==="glory1")f.glory++;
+      else if(e==="gold1draw1"){f.gold++;draw(fk);} else if(e==="skarbiec"){ if(f.gold<=0){draw(fk);draw(fk);draw(fk);} else {f.gold--;draw(fk);draw(fk);} }
+      else if(e==="endinterregnum"){ if(f.interregnum){f.ruler=BASIC_RULER[fk];f.interregnum=false;} else return false; }
+      else if(e==="wallprov"){ let mine=Object.keys(PROV).filter(p=>S.prov[p].owner===fk); if(mine.length)S.prov[mine[0]].wallBonus=(S.prov[mine[0]].wallBonus||0)+2; else return false; }
+      else draw(fk);
+      f.hand.splice(i,1); fxPlay(c,fk,[innerWidth*0.5,innerHeight*0.42]); floatDelta(fk,_g0,_gl0); return true; }
+  }catch(e){ console.warn(e); }
+  return false;
+}
+// AI attacks: if target involves player (owner or army), open interactive battle; else quick resolve
+async function aiBattle(army,prov){
+  const defFac=S.prov[prov].owner, defArmy=armyAt(prov);
+  if(defFac===S.player || (defArmy&&defArmy.f===S.player)){
+    // interactive: player defends
+    return new Promise(res=>{ battle={ attF:army.f, attArmy:army, defF:defFac, defArmy:defArmy||null, prov,
+       attCards:[], defCards:[], supports:[], phase:"nego", negoLog:[], playerSide:"def", aiDecided:false, _afterAI:res, _defendPlayer:true };
+      busy=false; openBattleUI(); requestBattleAI("openAsAttacker"); render(); });
+  } else {
+    // AI vs AI/neutral: quick resolve with AI-picked cards
+    battle={ attF:army.f, attArmy:army, defF:defFac, defArmy:defArmy||null, prov, attCards:[], defCards:[], supports:[], phase:"reveal", negoLog:[], playerSide:null, aiDecided:true };
+    await quickAICards();
+    const {att,def}=computeBattle();
+    talkSys(`⚔ ${FACTIONS[army.f].short} (${att}) atakuje ${PROV[prov].name} — obrona ${def}.`);
+    resolveBattleOutcome();
+    talkSys(battle.result);
+    battle=null;
+  }
+}
+async function quickAICards(){ // give each AI side up to 1 random tactic sometimes
+  const b=battle;
+  [b.attF,b.defF].forEach(()=>{});
+  // attacker
+  pickAIcard(b.attF,"att"); if(b.defF)pickAIcard(b.defF,"def");
+}
+function pickAIcard(fk,side){ if(!fk)return; const hand=S.f[fk].hand; const tac=hand.map((c,i)=>({c,i})).filter(o=>CARDS[o.c].t==="taktyka"&&CARDS[o.c].eff!=="bluff");
+  if(tac.length && rand()<0.6){ let pick=tac[seedInt()%tac.length]; if(side==="att")battle.attCards.push(pick.c); else battle.defCards.push(pick.c); hand.splice(pick.i,1); } }
+
+/* battle AI (defender/attacker talk + card choice + third-party support) */
+async function requestBattleAI(mode,playerMsg,cb){
+  const b=battle; if(!b){cb&&cb();return;}
+  busy=true; renderBattleUI(); render();
+  const aiFac = b.playerSide==="att" ? b.defF : b.attF; // the AI directly opposing player
+  const others = alive().filter(k=>k!==S.player && k!==aiFac);
+  const sys=`Toczy się bitwa o ${PROV[b.prov].name}. ${FACTIONS[b.attF].name} atakuje ${b.defF?FACTIONS[b.defF].name:"ziemię niczyją"}.
+Jesteś reżyserem WSZYSTKICH graczy-komputerowych przy stole. Gracz-człowiek prowadzi ${FACTIONS[S.player].name} (${b.playerSide==="att"?"atakuje":"broni się"}).
+Każda frakcja ma swój charakter i mówi po polsku, w stylu humorystycznym i toksycznym. Mogą kłamać, blefować, obiecywać wsparcie i nie dać go, grozić, przekupywać słownie.
+Charaktery: ${alive().filter(k=>k!==S.player).map(k=>FACTIONS[k].short+": "+FACTIONS[k].persona).join(" | ")}
+Aktualne sojusze: ${S.alliances.map(a=>FACTIONS[a.a].short+"+"+FACTIONS[a.b].short+" ("+a.treaty+")").join(", ")||"brak"}.
+Karty w ręku bezpośredniego przeciwnika gracza (${aiFac?FACTIONS[aiFac].short:"—"}): ${aiFac?S.f[aiFac].hand.join(", "):"—"}.
+${playerMsg?`Gracz właśnie powiedział: "${playerMsg}"`:"To początek negocjacji."}
+Zwróć TYLKO JSON:
+{"talk":[{"f":"klucz_frakcji","say":"kwestia"}...],
+ "opponent_cards":["klucz_karty",...] (0-2 karty z ręki ${aiFac?FACTIONS[aiFac].short:"przeciwnika"}, którymi zagra zakryte; mogą być blefy),
+ "supports":[{"f":"klucz_frakcji","side":"att|def","card":"klucz_karty"}...] (opcjonalnie: inna frakcja wtrąca się, jeśli to sensowne fabularnie — pamiętaj że może dać FAŁSZYWE POSIŁKI udając pomoc),
+ "ransom_offer": liczba (TYLKO gdy TY jesteś obrońcą i wolisz wykupić się Złotem niż walczyć — ile Złota oferujesz atakującemu-graczowi, by odpuścił; 0 albo pomiń, jeśli zamierzasz walczyć)}
+Klucze frakcji: rome, goths, vandals, gauls. Nie każ graczowi nic robić. Bądź zwięzły — 1-3 kwestie.`;
+  const usr=`Stan skrócony:\n${describeState(aiFac||b.attF)}\nZareaguj na sytuację i (jeśli to faza kart) wybierz karty przeciwnika.`;
+  let resp=await callLLM(sys,usr); let obj=parseJSON(resp);
+  if(obj){
+    (obj.talk||[]).forEach(t=>{ if(FACTIONS[t.f]) b.negoLog.push({who:FACTIONS[t.f].short,txt:t.say,color:FACTIONS[t.f].raw}); });
+    // AI-obrońca może zaproponować okup, gdy gracz atakuje
+    if(b.playerSide==="att" && b.defF && b.defF!==S.player && typeof obj.ransom_offer==="number" && obj.ransom_offer>0){
+      b.ransomOffer=Math.min(Math.floor(obj.ransom_offer), S.f[b.defF].gold);
+    }
+    if(mode==="final"||mode==="openAsAttacker"){
+      // set opponent cards
+      const oppFac=aiFac; const chosen=(obj.opponent_cards||[]).filter(c=>S.f[oppFac]&&S.f[oppFac].hand.includes(c)&&CARDS[c]&&(CARDS[c].t==="taktyka"||CARDS[c].t==="reakcja")).slice(0,2);
+      chosen.forEach(c=>{ let i=S.f[oppFac].hand.indexOf(c); if(i>=0)S.f[oppFac].hand.splice(i,1); });
+      if(b.playerSide==="att") b.defCards.push(...chosen); else b.attCards.push(...chosen);
+      // supports
+      (obj.supports||[]).forEach(sp=>{ if(FACTIONS[sp.f]&&sp.f!==S.player&&S.f[sp.f].hand.includes(sp.card)){ let i=S.f[sp.f].hand.indexOf(sp.card); S.f[sp.f].hand.splice(i,1); b.supports.push({f:sp.f,side:sp.side,card:sp.card}); } });
+      b.aiDecided=true;
+    }
+  }
+  busy=false;
+  if(mode==="openAsAttacker"){ b.phase="nego"; } // player will defend & place cards then fight
+  renderBattleUI(); render();
+  cb&&cb();
+}
+
+/* ===================== DYPLOMACJA ===================== */
+const TREATIES={
+  pakt:{n:"Pakt o nieagresji", d:"Nie możecie się nawzajem atakować."},
+  obronny:{n:"Sojusz obronny", d:"Gdy sojusznik jest atakowany, powinieneś pomóc."},
+  wrog:{n:"Wspólny wróg", d:"Oboje +1 Siły w walce z wybraną frakcją."},
+};
+function openDiplo(k){
+  if(busy||S.phase!=="play")return;
+  const existing=allianceOf(S.player,k);
+  if(existing){ showMsg(`<h2>Sojusz z ${FACTIONS[k].short}</h2><p>Macie już Formalny Sojusz: <b>${TREATIES[existing.treaty].n}</b>. ${TREATIES[existing.treaty].d}</p>
+    <div class="opts"><div class="opt" id="brk"><b>Zerwij sojusz (zdrada)</b> — Totem obraca się na ZDRADĘ.</div><div class="opt" id="cl">Zostaw</div></div>`,
+    el=>{ el.querySelector("#brk").onclick=()=>{closeMsg();tryBreak(existing);}; el.querySelector("#cl").onclick=closeMsg; }); return; }
+  showMsg(`<h2>Poselstwo do ${FACTIONS[k].short}</h2><p>Zaproponuj Formalny Sojusz i Traktat. ${FACTIONS[k].short} może się zgodzić… albo nie.</p>
+    <div class="opts">${Object.keys(TREATIES).map(t=>`<div class="opt" data-t="${t}"><b>${TREATIES[t].n}</b> — ${TREATIES[t].d}</div>`).join("")}
+    <div class="opt" id="cl">Anuluj</div></div>`,
+    el=>{ el.querySelectorAll(".opt[data-t]").forEach(o=>o.onclick=()=>{ closeMsg(); proposeAlliance(k,o.dataset.t); }); el.querySelector("#cl").onclick=closeMsg; });
+}
+async function proposeAlliance(k,treaty){
+  busy=true;render();
+  toast("Poseł w drodze do "+FACTIONS[k].short+"...");
+  const sys=`Jesteś ${FACTIONS[k].name} w toksycznej grze strategicznej. Charakter: ${FACTIONS[k].persona}.
+Gracz (${FACTIONS[S.player].name}) proponuje Formalny Sojusz z Traktatem "${TREATIES[treaty].n}" (${TREATIES[treaty].d}).
+Zdecyduj, czy to dla ciebie opłacalne (patrz na stan gry, kto zagraża). Odpowiedz TYLKO JSON: {"accept":true/false,"say":"jedno zdanie po polsku, w charakterze"}.`;
+  const usr=describeState(k);
+  let resp=await callLLM(sys,usr); let obj=parseJSON(resp)||{accept:rand()<0.5,say:"Niech będzie… na razie."};
+  talk(k,obj.say||"...");
+  if(obj.accept){ S.alliances.push({a:S.player,b:k,treaty,betrayed:false}); S.f[k].diplo="Sojusz z Tobą ("+TREATIES[treaty].n+")"; S.f[S.player].diplo="Sojusz z "+FACTIONS[k].short; talkSys(`🗿 Formalny Sojusz: ${FACTIONS[S.player].short} + ${FACTIONS[k].short} (${TREATIES[treaty].n}).`); }
+  else { toast(FACTIONS[k].short+" odmawia."); }
+  busy=false; render();
+}
+function tryBreak(al){
+  const other=al.a===S.player?al.b:al.a;
+  showMsg(`<h2>Zerwać sojusz z ${FACTIONS[other].short}?</h2><p>Totem obróci się na stronę <b>ZDRADA</b>. ${FACTIONS[other].short} otrzyma <b>Casus Belli</b> — premię do zemsty na Tobie. Ale zdrada bywa opłacalna.</p>
+    <div class="opts"><div class="opt" id="yes"><b>Tak, zdradzam.</b></div><div class="opt" id="no">Jednak nie</div></div>`,
+    el=>{ el.querySelector("#yes").onclick=()=>{ closeMsg(); doBreak(al,S.player); }; el.querySelector("#no").onclick=closeMsg; });
+}
+function doBreak(al,by){
+  const other=al.a===by?al.b:al.a;
+  al.betrayed=true; al.casusBelli=other; al.betrayer=by;
+  S.alliances=S.alliances.filter(x=>x!==al); // remove active alliance, keep casus belli note
+  S.f[other].casusBelli=by; S.f[by].glory=Math.max(0,S.f[by].glory); // could add hańba later
+  S.f[other].diplo="Zdradzony przez "+FACTIONS[by].short+"! (Casus Belli)"; S.f[by].diplo="Zdrajca "+FACTIONS[other].short;
+  talkSys(`💢 ${FACTIONS[by].short} ZDRADZA ${FACTIONS[other].short}! Totem obrócony. ${FACTIONS[other].short} ma Casus Belli.`);
+  render();
+}
+
+/* ===================== WŁADCA / DWÓR / BEZKRÓLEWIE ===================== */
+function rulerName(k){ return CARDS[k]?CARDS[k].n.split(",")[0]:"Władca"; }
+function openCourt(){
+  if(busy||S.phase!=="play"||S.order[S.cur]!==S.player) return;
+  const f=S.f[S.player]; let html=`<h2>Dwór ${FACTIONS[S.player].short}</h2>`;
+  if(f.interregnum) html+=`<p><b style="color:#8a2b22">BEZKRÓLEWIE.</b> Na początku każdej swojej tury rzucasz k6 (6 = wraca zwykły Władca). Albo mianuj Postać już teraz.</p>`;
+  else { const rc=CARDS[f.ruler]; html+=`<p>👑 Władca: <b>${rc?rc.n:'—'}</b>${f.rulerInArmy?' — <span style="color:#8a2b22">prowadzi Armię (ryzykuje życiem)</span>':''}.<br><span style="font-size:12px;color:#5a4a35">${rc&&rc.rule?'Jako Władca: '+rc.rule:'Brak bonusu jako Władca.'}</span></p>`; }
+  html+=`<div class="opts">`;
+  const myArmies=armiesOf(S.player);
+  if(!f.interregnum && !f.rulerInArmy && myArmies.some(a=>!a.cmd)) html+=`<div class="opt" id="lead"><b>👑 Poprowadź Armię Władcą</b> — +1 Siły, +1 Chwały za wygraną; przy przegranej rzut k6 na śmierć.</div>`;
+  if(f.rulerInArmy) html+=`<div class="opt" id="home"><b>Ściągnij Władcę na tron</b> — bezpiecznie, bez ryzyka.</div>`;
+  f.hand.forEach(c=>{ const cd=CARDS[c]; if(cd&&(cd.t==="dowódca"||cd.t==="postać")) html+=`<div class="opt" data-nom="${c}"><b>Mianuj Władcą: ${cd.n}</b> — ${f.interregnum?'kończy Bezkrólewie (za darmo).':'(−1 Chwała).'} ${cd.rule?'Jako Władca: '+cd.rule:'Bez bonusu jako Władca.'}</div>`; });
+  myArmies.filter(a=>a.cmd&&!a.rulerLed&&CARDS[a.cmd]&&(CARDS[a.cmd].t==="dowódca"||CARDS[a.cmd].t==="postać")).forEach(a=>{ const cd=CARDS[a.cmd]; html+=`<div class="opt" data-nomarmy="${a.id}"><b>Koronuj Dowódcę: ${cd.n}</b> (z ${a.name}) — ${f.interregnum?'kończy Bezkrólewie.':'(−1 Chwała).'} Tracisz go jako Dowódcę.</div>`; });
+  html+=`<div class="opt" id="close">Zamknij</div></div>`;
+  showMsg(html, el=>{
+    el.querySelector("#lead")&&(el.querySelector("#lead").onclick=()=>{ closeMsg(); chooseArmyForRuler(); });
+    el.querySelector("#home")&&(el.querySelector("#home").onclick=()=>{ closeMsg(); rulerHome(S.player); render(); });
+    el.querySelector("#close")&&(el.querySelector("#close").onclick=closeMsg);
+    el.querySelectorAll(".opt[data-nom]").forEach(o=>o.onclick=()=>{ closeMsg(); nominateFromHand(o.dataset.nom); });
+    el.querySelectorAll(".opt[data-nomarmy]").forEach(o=>o.onclick=()=>{ closeMsg(); nominateFromArmy(+o.dataset.nomarmy); });
+  });
+}
+function chooseArmyForRuler(){
+  const my=armiesOf(S.player).filter(a=>!a.cmd);
+  if(!my.length){ toast("Potrzebna Armia bez Dowódcy — Władca zajmuje miejsce Dowódcy."); return; }
+  if(my.length===1){ rulerToArmy(my[0].id); return; }
+  showMsg(`<h2>Którą Armię poprowadzi Władca?</h2><div class="opts">`+my.map(a=>`<div class="opt" data-id="${a.id}"><b>${a.name}</b> w ${PROV[a.loc].name} (Siła ${armyStr(a)})</div>`).join("")+`<div class="opt" id="c">Anuluj</div></div>`,
+    el=>{ el.querySelectorAll(".opt[data-id]").forEach(o=>o.onclick=()=>{ closeMsg(); rulerToArmy(+o.dataset.id); }); el.querySelector("#c").onclick=closeMsg; });
+}
+function rulerToArmy(id){ const f=S.f[S.player]; const a=armyById(id); if(!a||a.f!==S.player||a.cmd) return;
+  a.cmd=f.ruler; a.rulerLed=true; f.rulerInArmy=id;
+  talkSys(`👑 ${rulerName(f.ruler)} osobiście prowadzi ${a.name}! Reszta stołu zaciera ręce.`); render(); }
+function rulerHome(fk){ const f=S.f[fk]; if(!f.rulerInArmy) return; const a=armyById(f.rulerInArmy); if(a){ a.cmd=null; a.rulerLed=false; } f.rulerInArmy=null; talkSys(`👑 ${FACTIONS[fk].short}: Władca wraca na tron.`); }
+function nominateFromHand(c){ const f=S.f[S.player]; const wasInter=f.interregnum;
+  if(!wasInter){ if(f.glory<1){ toast("Mianowanie za życia Władcy kosztuje 1 Chwałę."); return; } f.glory-=1; }
+  let i=f.hand.indexOf(c); if(i>=0)f.hand.splice(i,1);
+  if(f.rulerInArmy) rulerHome(S.player);
+  f.ruler=c; f.interregnum=false;
+  talkSys(`👑 ${FACTIONS[S.player].short} mianuje ${rulerName(c)} Władcą.${wasInter?' Bezkrólewie skończone.':' (−1 Chwała)'}`); render(); }
+function nominateFromArmy(id){ const f=S.f[S.player]; const a=armyById(id); if(!a||!a.cmd) return; const wasInter=f.interregnum;
+  if(!wasInter){ if(f.glory<1){ toast("Mianowanie kosztuje 1 Chwałę."); return; } f.glory-=1; }
+  const c=a.cmd; a.cmd=null; a.rulerLed=false; if(f.rulerInArmy)rulerHome(S.player);
+  f.ruler=c; f.interregnum=false;
+  talkSys(`👑 ${rulerName(c)} zdejmuje zbroję Dowódcy i zakłada koronę.${wasInter?' Bezkrólewie skończone.':' (−1 Chwała)'}`); render(); }
+function rulerDeathTest(fk, army){ const f=S.f[fk]; const rn=rulerName(f.ruler);
+  const r=d6(); if(army){ army.cmd=null; army.rulerLed=false; } f.rulerInArmy=null;
+  if(r<=2){ f.ruler=null; f.interregnum=true; talkSys(`💀 (k6=${r}) ${rn} GINIE w bitwie! ${FACTIONS[fk].short} pogrąża się w Bezkrólewiu.`); }
+  else if(r<=4){ talkSys(`🩸 (k6=${r}) ${rn} ranny — ledwo uchodzi z życiem, wraca na tron.`); }
+  else { talkSys(`🏃 (k6=${r}) ${rn} ucieka bez szwanku i wraca na tron.`); } }
+function rulerUpkeep(fk){ const f=S.f[fk];
+  if(f.interregnum){ const r=d6(); if(r===6){ f.ruler=BASIC_RULER[fk]; f.interregnum=false; talkSys(`👑 ${FACTIONS[fk].short}: (k6=6) ${rulerName(BASIC_RULER[fk])} obejmuje tron — Bezkrólewie skończone.`); } else talkSys(`👑 ${FACTIONS[fk].short}: Bezkrólewie trwa (k6=${r}).`); return; }
+  if(!f.rulerInArmy){ const rc=CARDS[f.ruler]; if(rc){ if(rc.ruleEff==="gold"){f.gold++;} if(rc.ruleEff==="glory"){f.glory++;} if(rc.ruleEff==="badgold"){f.gold=Math.max(0,f.gold-1);} if(rc.ruleEff==="admingold"&&provCount(fk)>=3){f.gold++;} } } }
+
+/* ===================== TURA / RUNDA ===================== */
+document.getElementById("seal").onclick=()=>{ if(busy||S.over)return; if(S.order[S.cur]!==S.player)return; endTurn(); };
+document.getElementById("help").onclick=()=>showHelp();
+function showHelp(){ showMsg(`<h2>Jak grać — sterowanie</h2>
+  <div style="font-size:12.5px;line-height:1.5">
+  <p><b>Cel:</b> najwięcej <b>Chwały</b> po 8 rundach (albo gdy znikną neutralne ziemie). Masz <b>3 Akcje</b> na turę.</p>
+  <p><b>Armia:</b> kliknij swoją Armię → kliknij sąsiednią prowincję. Zielona = marsz (po swoim), czerwona = atak, 🔒 = za mocna na gołą Armię (przygotuj ją Dowódcą/Wzmocnieniem).</p>
+  <p><b>Bramkowanie ataku:</b> Obrona ≤3 dowolna Armia; 4–5 wymaga Przygotowanej (Dowódca lub Wzmocnienie); ≥6 wymaga Dowódcy albo 2 Wzmocnień.</p>
+  <p><b>Karty z ręki:</b> Dowódca/Wzmocnienie/Postać → kliknij kartę, potem swoją Armię (dołączasz). Intrygi i Karty Specjalne → kliknij, wybierz cel/efekt. <b>Taktyki i Reakcje</b> kładziesz zakryte dopiero <b>w bitwie</b>.</p>
+  <p><b>Bitwa (blef!):</b> obie strony kładą do 2 kart zakrytych (możesz blefować śmieciami). Przed odkryciem: atakujący może się wycofać, obrońca zaproponować okup. Zagrane karty przepadają — też blefy.</p>
+  <p><b>Rekrutacja:</b> dwuklik na swojej ziemi (5 Złota, Galowie 4). Limit 3 Armie (Galowie 4).</p>
+  <p><b>Dwór (👑):</b> kliknij swoją matę — mianuj Postać Władcą, poprowadź nim Armię (ryzyko śmierci → Bezkrólewie).</p>
+  <p><b>Wrogowie:</b> panel w prawym-dolnym rogu — kliknij frakcję, by zobaczyć jej stan i prowadzić dyplomację.</p>
+  <p><b>Wydarzenia:</b> karty Chaosu są wtasowane w talie i odpalają się, gdy ktoś je dobierze (patrz Kronika stołu).</p>
+  <p style="text-align:center;margin-top:10px"><button class="btn" id="closeHelp">Zamknij</button></p>
+  </div>`, el=>{ el.querySelector("#closeHelp").onclick=closeMsg; }); }
+async function endTurn(){
+  // goths streak reset if no conquest this turn
+  if(S.order[S.cur]==="goths" && !S.f.goths.conqThisTurn) S.f.goths.streak=0;
+  await advance();
+}
+async function advance(){
+  clearSel(); busy=true; render();
+  let guard=0;
+  do{
+    S.cur++;
+    if(S.cur>=S.order.length){ S.cur=0; await endRound(); if(S.over){busy=false;render();return;} }
+    guard++;
+  }while(!S.f[S.order[S.cur]].alive && guard<12);
+  const fk=S.order[S.cur];
+  S.actions=3; S.f[fk].conqThisTurn=false;
+  rulerUpkeep(fk);
+  // Dochód na starcie tury: +1 Złoto/Prowincję, +1 Chwały/pełny Region; dobór karty
+  if(S.f[fk].alive){ const pc=provCount(fk), rg=fullRegions(fk); if(pc>0)S.f[fk].gold+=pc; if(rg>0)S.f[fk].glory+=rg; draw(fk);
+    if(fk===S.player) talkSys(`💰 Dochód: +${pc} Złota${rg?`, +${rg} Chwały za regiony`:""}, dobrano kartę.`); }
+  render();
+  if(fk===S.player){ busy=false; render(); toast(`Twoja tura — Runda ${S.round}. Masz 3 akcje.`); }
+  else { await aiTurn(fk); await sleep(300); await advance(); }
+}
+async function endRound(){
+  // reset moved
+  S.armies.forEach(a=>{a.moved=false;});
+  // blokada ruchu (zmęczenie po przegranej / „ukradziona mapa") wygasa z końcem rundy
+  S.armies.forEach(a=>{a.blocked=false;});
+  // faction upkeep — odrębne silniki Chwały
+  // GALOWIE: Chwała za każdą Armię ponad pierwszą (konfederacja wodzów)
+  if(S.f.gauls.alive){ let extra=Math.max(0,armiesOf("gauls").length-1); if(extra>0){ S.f.gauls.glory+=extra; talkSys(`⚜️ Konfederacja Galów: +${extra} Chwały za ${extra+1} wodzów.`);} }
+  // RZYM: Dekadencja + Chwała za przetrwanie i stabilność
+  if(S.f.rome.alive){ let over=Math.max(0,provCount("rome")-3); S.f.rome.dek+=over;
+    if(provCount("rome")>0 && S.prov.italia.owner==="rome") S.f.rome.glory+=2;
+    if(S.f.rome.dek<=2 && provCount("rome")>0){ S.f.rome.glory+=1; talkSys(`🏛️ Rzym trzyma się w ryzach (Dekadencja ${S.f.rome.dek}): +1 Chwały za stabilność.`); }
+    if(S.f.rome.dek>=4){ let ps=Object.keys(PROV).filter(p=>S.prov[p].owner==="rome"&&!armyAt(p)); if(ps.length){ let p=ps[seedInt()%ps.length]; S.prov[p].owner=null; talkSys(`🏛️ DEKADENCJA! ${PROV[p].name} buntuje się przeciw Rzymowi.`);} S.f.rome.dek-=4; } }
+  // eliminate factions with no provinces & no armies
+  alive().forEach(k=>{ if(provCount(k)===0 && armiesOf(k).length===0){ S.f[k].alive=false; talkSys(`☠️ ${FACTIONS[k].short} znika z mapy dziejów.`);} });
+  // (dobór kart przeniesiony na start tury każdego gracza)
+  S.round++; S.noRecruit=false;
+  const neutrals=Object.keys(PROV).filter(p=>!S.prov[p].owner).length;
+  if(S.round>S.maxRounds || neutrals===0){ endGame(); return; }
+  talkSys(`— RUNDA ${S.round} —`);
+  render();
+  await sleep(400);
+}
+function endGame(){
+  S.over=true;
+  // region bonus
+  for(const r in REGIONS){ const provs=REGIONS[r].provs; let owner=S.prov[provs[0]].owner;
+    if(owner && provs.every(p=>S.prov[p].owner===owner)){ S.f[owner].glory+=3; talkSys(`👑 ${FACTIONS[owner].short} kontroluje cały region ${REGIONS[r].name}: +3 Chwały.`); } }
+  const rank=Object.keys(FACTIONS).sort((a,b)=>(S.f[b].glory-S.f[a].glory)||(provCount(b)-provCount(a))||(S.f[b].gold-S.f[a].gold));
+  const win=rank[0];
+  render();
+  showMsg(`<h2>Koniec dziejów</h2>
+    <p><b style="font-size:20px">${FACTIONS[win].short}</b> zwycięża z ${S.f[win].glory} Chwały!</p>
+    <div class="opts">${rank.map((k,i)=>`<div class="opt" style="cursor:default"><b>${i+1}. ${FACTIONS[k].short}</b> — ${S.f[k].glory} Chwały • ${provCount(k)} prowincji ${k===S.player?"(Ty)":""}</div>`).join("")}</div>
+    <p style="margin-top:12px;text-align:center"><button class="btn" onclick="location.reload()">Zagraj ponownie</button></p>`,()=>{},true);
+}
+
+/* ===================== LLM ===================== */
+let API_KEY=localStorage.getItem("barb_key")||"", MODEL=localStorage.getItem("barb_model")||"claude-sonnet-5";
+async function callLLM(sys,usr){
+  if(!API_KEY){ return simpleBot(sys,usr); }
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{ method:"POST",
+      headers:{"content-type":"application/json","x-api-key":API_KEY,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:MODEL,max_tokens:1200,system:sys,messages:[{role:"user",content:usr}]})});
+    if(!r.ok){ let t=await r.text(); toast("Błąd API: "+r.status); console.warn(t); return simpleBot(sys,usr); }
+    const j=await r.json(); return (j.content||[]).filter(b=>b&&b.type==="text").map(b=>b.text).join("").trim()||"";
+  }catch(e){ console.warn(e); toast("Brak połączenia z API — bot awaryjny."); return simpleBot(sys,usr); }
+}
+function simpleBot(sys,usr){ // fallback: valid JSON-ish minimal
+  if(sys.includes('"accept"')) return JSON.stringify({accept:rand()<0.45,say:"Zobaczymy, czy dotrzymasz słowa."});
+  if(sys.includes('"talk"')) return JSON.stringify({talk:[{f:"rome",say:"Hmm."}],opponent_cards:[],supports:[]});
+  return JSON.stringify({table_talk:"...",action:{type:"pass"}});
+}
+function parseJSON(t){ if(!t)return null; let m=t.match(/\{[\s\S]*\}/); if(!m)return null; try{return JSON.parse(m[0]);}catch(e){ try{return JSON.parse(m[0].replace(/,\s*}/g,"}").replace(/,\s*]/g,"]"));}catch(e2){return null;} } }
+
+/* ===================== UI helpers ===================== */
+function talk(fk,txt){ const log=document.getElementById("chlog"); let d=document.createElement("div"); d.className="tk";
+  d.innerHTML=`<span class="who" style="color:${FACTIONS[fk].raw}">${FACTIONS[fk].short}:</span> <span class="say">${esc(txt)}</span>`; log.appendChild(d); log.parentElement.scrollTop=1e9;
+  S.f[fk] && (S.f[fk].diplo=S.f[fk].diplo); }
+function talkSys(txt){ const log=document.getElementById("chlog"); let d=document.createElement("div"); d.className="tk sys"; d.textContent=txt; log.appendChild(d); log.parentElement.scrollTop=1e9; }
+function esc(s){ return (s+"").replace(/[<>&]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[c])); }
+let toastT=null;
+function toast(t){ const box=document.getElementById("toast"); let d=document.createElement("div"); d.className="toast"; d.textContent=t; box.appendChild(d);
+  setTimeout(()=>{d.style.opacity=0;d.style.transition="opacity .5s";setTimeout(()=>d.remove(),500);},2600); }
+function showMsg(html,after,noClose){ const v=document.getElementById("msgVeil"),m=document.getElementById("msg"); m.innerHTML=html; v.classList.add("on");
+  v.onclick=noClose?null:(e=>{if(e.target===v)closeMsg();}); after&&after(m); }
+function closeMsg(){ document.getElementById("msgVeil").classList.remove("on"); }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+/* ===================== ANIMACJE KART ===================== */
+const FX_COL={taktyka:"#3a6ea5",intryga:"#7a3aa5",reakcja:"#c07a1a","dowódca":"#8f2d22","postać":"#b8860b",wzmocnienie:"#2f6f3a",specjalna:"#8a6d1a","władca":"#8f2d22",wydarzenie:"#8a2b22"};
+function _rc(el){ if(!el)return null; const r=el.getBoundingClientRect(); if(!r.width)return null; return [r.left+r.width/2, r.top+r.height/2]; }
+function provXY(p){ return _rc(document.querySelector('.prov[data-p="'+p+'"]')); }
+function armyXY(id){ return _rc(document.querySelector('.army[data-id="'+id+'"]')); }
+function pulseAt(x,y){ if(x==null)return; const p=document.createElement("div"); p.className="fx-pulse"; p.style.left=x+"px"; p.style.top=y+"px"; document.body.appendChild(p); setTimeout(()=>p.remove(),650); }
+function hitSel(sel){ const el=document.querySelector(sel); if(!el)return; el.classList.remove("fx-hit"); void el.offsetWidth; el.classList.add("fx-hit"); setTimeout(()=>el&&el.classList.remove("fx-hit"),850); }
+function throwCard(cardKey,opt){ opt=opt||{}; const cd=CARDS[cardKey]; if(!cd)return; if(!document.querySelector(".prov"))return; // nie animuj gdy brak planszy
+  const W=innerWidth,H=innerHeight; const to=opt.to||[W/2,H/2]; const from=opt.from||[W/2,H*0.95];
+  const el=document.createElement("div"); el.className="flycard"; el.style.borderLeftColor=FX_COL[cd.t]||"#9a8660";
+  el.innerHTML=(opt.who?`<div class="fwho" style="color:${opt.color||'#3a2c18'}">${opt.who}</div>`:"")+`<div class="fn">${cd.n}</div><div class="ft">${(cd.d||"").slice(0,72)}</div>`;
+  el.style.left=from[0]+"px"; el.style.top=from[1]+"px"; el.style.setProperty("--fr",(Math.random()*12-6).toFixed(1)+"deg");
+  document.body.appendChild(el);
+  requestAnimationFrame(()=>{ el.classList.add("in"); el.style.left=to[0]+"px"; el.style.top=to[1]+"px"; });
+  setTimeout(()=>pulseAt(to[0],to[1]),460);
+  setTimeout(()=>{ el.classList.remove("in"); el.classList.add("out"); },1150);
+  setTimeout(()=>el.remove(),1750);
+}
+// zagranie karty: gracz (z ręki, dół) albo AI (z panelu wrogów / boku); to = punkt docelowy [x,y] w px
+function fxPlay(cardKey,fk,to){ const isP=fk===S.player; const W=innerWidth,H=innerHeight;
+  throwCard(cardKey,{ who:isP?null:(FACTIONS[fk]?FACTIONS[fk].short:""), color:FACTIONS[fk]?FACTIONS[fk].raw:"",
+    to: to||[W/2,H/2], from: isP?[W*0.5,H*0.96]:[W*0.93,H*0.8] }); }
+function matXY(fk){ const m=[...document.querySelectorAll(".mat")].find(x=>x.querySelector("h3")&&x.querySelector("h3").textContent.includes(FACTIONS[fk].short)); return _rc(m); }
+function floatGain(text,xy,color){ if(!xy)return; const el=document.createElement("div"); el.className="fx-float"; el.textContent=text; if(color)el.style.color=color; el.style.left=xy[0]+"px"; el.style.top=xy[1]+"px"; document.body.appendChild(el); setTimeout(()=>el.remove(),1450); }
+// pokaż zmiany zasobów frakcji (Złoto/Chwała) jako wyskakujące „+N" przy jej macie/chipie
+function floatDelta(fk,g0,gl0){ let xy=matXY(fk); if(!xy){ const chip=[...document.querySelectorAll("#enemies .echip")].find(c=>c.dataset.k===fk); xy=_rc(chip); } if(!xy)return;
+  const f=S.f[fk]; if(f.gold>g0)floatGain("+"+(f.gold-g0)+" 💰",xy,"#b8860b"); if(f.glory>gl0)floatGain("+"+(f.glory-gl0)+" ✦",[xy[0]+34,xy[1]],"#8a7d3d"); }
+
+/* ===================== START ===================== */
+function boot(){
+  showMsg(`<h2>Barbarzyńcy u Bram</h2>
+   <p style="line-height:1.45">Prototyp do testów. Wcielasz się w jedną frakcję, trzy pozostałe prowadzi <b>Claude</b> — negocjują, obiecują i zdradzają po polsku.</p>
+   ${API_KEY
+     ? `<p style="font-size:13px;color:#2f6f3a;margin:8px 0 2px">✓ Klucz API zapamiętany — nie musisz go wpisywać. <a href="#" id="chgkey" style="color:#8a2b22;margin-left:4px">zmień / wyczyść</a></p>
+        <input id="key" type="password" value="${API_KEY}" style="display:none">`
+     : `<p style="font-size:12px;color:#6b5030">Klucz API Anthropic (żeby frakcje myślały; bez klucza działa tryb awaryjnego bota). Zapisze się w tej przeglądarce, wpiszesz go tylko raz.</p>
+        <input id="key" type="password" placeholder="sk-ant-... (wklej raz)" value="">`}
+   <select id="model"><option value="claude-sonnet-5">Claude Sonnet 5 (szybki, tani — polecany)</option><option value="claude-opus-4-8">Claude Opus 4.8 (najsprytniejszy, wolniejszy)</option><option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (najszybszy)</option></select>
+   <p style="margin-top:10px">Wybierz swoją frakcję:</p>
+   <div class="opts">${Object.keys(FACTIONS).map(k=>`<div class="opt" data-k="${k}"><b style="color:${FACTIONS[k].raw}">${FACTIONS[k].name}</b><br><span style="font-size:11px;color:#5a4a35">${FACTIONS[k].mech}</span></div>`).join("")}</div>`,
+   el=>{ el.querySelector("#model").value=MODEL;
+     const chg=el.querySelector("#chgkey"); if(chg)chg.onclick=(e)=>{ e.preventDefault(); const inp=el.querySelector("#key"); inp.style.display="block"; inp.value=""; inp.placeholder="sk-ant-... (nowy klucz, albo zostaw puste by wyczyścić)"; inp.focus(); API_KEY=""; localStorage.removeItem("barb_key"); chg.parentElement.innerHTML="Wpisz nowy klucz (albo zostaw puste — wtedy tryb bota):"; };
+     el.querySelectorAll(".opt[data-k]").forEach(o=>o.onclick=()=>{
+       const typed=el.querySelector("#key").value.trim(); API_KEY=typed||API_KEY; MODEL=el.querySelector("#model").value;
+       if(API_KEY)localStorage.setItem("barb_key",API_KEY); else localStorage.removeItem("barb_key"); localStorage.setItem("barb_model",MODEL);
+       closeMsg(); startGame(o.dataset.k); }); }, true);
+}
+function startGame(player){
+  RNG=987654321;
+  newState(player);
+  talkSys(`Grasz jako ${FACTIONS[player].name}. Faza układania stołu — rozłóż prowincje i talię, potem ROZPOCZNIJ GRĘ.`);
+  render();
+  toast("🗺️ Rozłóż prowincje jak chcesz (przeciągaj), potem kliknij ROZPOCZNIJ GRĘ.");
+  makeDeckDraggable();
+  window.addEventListener("resize",render);
+}
+function makeDeckDraggable(){ const dk=document.getElementById("deck"); if(!dk||dk._dragSet)return; dk._dragSet=true;
+  dk.addEventListener("mousedown",e=>{ if(!S||S.phase!=="setup")return; e.preventDefault();
+    const sx=e.clientX,sy=e.clientY,ox=S.deckPos.x,oy=S.deckPos.y; dk.style.zIndex=50;
+    const mm=ev=>{ S.deckPos.x=Math.max(0,Math.min(94,ox+(ev.clientX-sx)/T.clientWidth*100)); S.deckPos.y=Math.max(0,Math.min(88,oy+(ev.clientY-sy)/T.clientHeight*100)); dk.style.left=S.deckPos.x+"%"; dk.style.top=S.deckPos.y+"%"; };
+    const mu=()=>{ document.removeEventListener("mousemove",mm); document.removeEventListener("mouseup",mu); dk.style.zIndex=""; };
+    document.addEventListener("mousemove",mm); document.addEventListener("mouseup",mu); }); }
+boot();
+</script>
