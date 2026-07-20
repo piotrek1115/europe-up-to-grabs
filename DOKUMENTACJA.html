@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8">
+<title>Europe: Up To Grabs! — dokumentacja projektu</title>
+<style>
+@page { size: A4; margin: 18mm 16mm 20mm 16mm; }
+*{box-sizing:border-box}
+body{margin:0;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:#241d15;font-size:10.5pt;line-height:1.55}
+h1,h2,h3{margin:0 0 .35em;line-height:1.2}
+h2{font-size:16pt;color:#7a1f1f;border-bottom:2px solid #d8cfbc;padding-bottom:4px;margin-top:1.6em;page-break-after:avoid}
+h3{font-size:12pt;color:#4a3a22;margin-top:1.2em;page-break-after:avoid}
+p{margin:.5em 0}
+ul,ol{margin:.4em 0 .6em;padding-left:1.2em}
+li{margin:.22em 0}
+table{width:100%;border-collapse:collapse;margin:.6em 0;font-size:9.5pt;page-break-inside:avoid}
+th,td{border:1px solid #cfc6b2;padding:6px 8px;text-align:left;vertical-align:top}
+th{background:#efe9dc;font-weight:600}
+.small{font-size:9pt;color:#5c5142}
+.cover{height:245mm;display:flex;flex-direction:column;justify-content:center;page-break-after:always;text-align:center}
+.cover h1{font-size:34pt;color:#7a1f1f;letter-spacing:.5px}
+.cover .sub{font-size:13pt;color:#4a3a22;margin-top:6px}
+.cover .meta{margin-top:38px;font-size:10pt;color:#5c5142;line-height:1.8}
+.rule{width:70px;height:4px;background:#b8860b;margin:18px auto}
+.box{background:#faf6ec;border:1px solid #ded4bd;border-left:4px solid #b8860b;padding:10px 13px;margin:.7em 0;page-break-inside:avoid}
+.box b{color:#7a1f1f}
+.tag{display:inline-block;background:#7a1f1f;color:#fff;font-size:8pt;padding:2px 7px;border-radius:3px;margin-right:5px;vertical-align:1px}
+.fac{border-left:5px solid;padding:8px 12px;margin:.6em 0;background:#faf8f3;page-break-inside:avoid}
+.fac h3{margin:0 0 3px;color:#241d15}
+.fac .id{font-style:italic;color:#5c5142;font-size:9.5pt}
+.sec{page-break-before:always}
+.kv{display:flex;gap:10px;margin:3px 0}
+.kv .k{min-width:140px;font-weight:600;color:#4a3a22}
+footer{margin-top:26px;border-top:1px solid #d8cfbc;padding-top:8px;font-size:8.5pt;color:#7a6d59}
+code{background:#f0ebe0;padding:1px 4px;border-radius:3px;font-size:9pt}
+</style></head><body>
+
+<div class="cover">
+  <h1>Europe: Up To Grabs!</h1>
+  <div class="sub">Humorystyczna gra strategiczno-karciana o Wędrówce Ludów<br>i upadku Zachodniego Cesarstwa</div>
+  <div class="rule"></div>
+  <div class="sub" style="font-size:11pt">Dokumentacja projektu &nbsp;·&nbsp; wersja prototypowa</div>
+  <div class="meta">
+    Tytuł roboczy PL: <b>Barbarzyńcy u Bram</b><br>
+    2–4 graczy &nbsp;·&nbsp; 45–75 minut &nbsp;·&nbsp; złożoność średnia<br>
+    Status: <b>działający prototyp cyfrowy</b> (do testów jednoosobowych)<br><br>
+    Repozytorium: github.com/piotrek1115/europe-up-to-grabs
+  </div>
+</div>
+
+<h2>1. Czym jest ta gra</h2>
+<p><b>Europe: Up To Grabs!</b> to humorystyczna gra strategiczno-karciana dla 2–4 graczy, osadzona w chaosie V wieku — kiedy Zachodnie Cesarstwo Rzymskie rozpada się, a przez Europę przetaczają się ludy szukające nowego domu (najchętniej cudzego).</p>
+<p>Gracze wcielają się w rywalizujące frakcje: rozpadający się <b>Rzym</b>, wędrujących <b>Gotów</b>, grabiących <b>Wandalów</b> i kłótliwą konfederację <b>Galów</b>. Walczą o ziemie, Złoto i przede wszystkim o <b>Chwałę</b> — a robią to podbijając prowincje, blefując w bitwach, zawierając sojusze i łamiąc je w najgorszym możliwym momencie.</p>
+<div class="box"><b>Docelowa emocja przy stole:</b> „Mam genialny plan. Chyba że ten drań właśnie mnie zdradzi.”</div>
+<p>Gra jest <b>inspirowana historią, ale nie jest grą historyczną</b>. Nie obowiązuje chronologia — Belizariusz może walczyć z Attylą o Brytanię, a Goci mogą właśnie szukać drogi przez Galię, bo ktoś ukradł im mapę. Historia jest źródłem postaci, sytuacji i humoru, nigdy ograniczeniem.</p>
+
+<h3>Ton</h3>
+<p>Inspiracja tonalna: <i>Stwory z Obory</i>. Kolorowo, groteskowo, lekko absurdalnie, z bezczelnymi nazwami kart. Ale <b>pod warstwą humoru siedzi prawdziwa strategia</b> — to nie ma być czysta imprezówka oparta na losowości.</p>
+
+<h3>Filary projektowe</h3>
+<ul>
+<li><b>Proste zasady bazowe</b> — gracz szybko rozumie, co może zrobić w turze.</li>
+<li><b>Silna asymetria frakcji</b> — nie „+1 do ataku”, tylko inna fantazja i inny rytm gry.</li>
+<li><b>Blef</b> — nigdy nie masz pełnej informacji o możliwościach przeciwnika, zwłaszcza w bitwie.</li>
+<li><b>Toksyczna dyplomacja</b> — obietnice, układy, zdrady i odgrywanie się.</li>
+<li><b>Humor z mechaniki</b>, nie tylko z ilustracji — same zasady mają tworzyć absurdalne sytuacje.</li>
+<li><b>Geografia bez „Ryzyka”</b> — pozycja ma znaczenie, ale nie przesuwamy dziesiątek jednostek.</li>
+</ul>
+
+<h2 class="sec">2. Komponenty</h2>
+<table>
+<tr><th style="width:32%">Element</th><th>Opis</th></tr>
+<tr><td><b>Karty Prowincji</b> (16)</td><td>Tworzą mapę Europy układaną na stole. Podzielone na 4 Regiony po 4 Prowincje. Każda ma wartość <b>Obrony</b> (2–6).</td></tr>
+<tr><td><b>Talie frakcyjne</b> (4 × 36)</td><td>Każda frakcja ma własną, samodzielną talię 36 kart o wyraźnie innym stylu gry.</td></tr>
+<tr><td><b>Karty Wydarzeń</b> (9)</td><td>Wtasowane we wszystkie talie. Odpalają się w chwili dobrania — dotykają wszystkich.</td></tr>
+<tr><td><b>Karty Armii</b></td><td>Armia to jeden fizyczny obiekt (Siła bazowa 3) ze slotami: 1 Dowódca + 2 Wzmocnienia.</td></tr>
+<tr><td><b>Sztandary</b></td><td>Oznaczają kontrolę nad Prowincją. To sztandar, nie obecność Armii, decyduje o właścicielu.</td></tr>
+<tr><td><b>Totem Sojuszu</b></td><td>Dwustronny obiekt kładziony między graczami: <b>SOJUSZ</b> / <b>ZDRADA</b>.</td></tr>
+<tr><td><b>Żetony</b></td><td><b>Chwała</b> (punkty zwycięstwa) i <b>Złoto</b> (zasób ekonomiczny). Tylko dwa zasoby.</td></tr>
+<tr><td><b>Maty graczy</b></td><td>Pola na Chwałę, Złoto, liczniki, <b>tron Władcy</b> i aktywne Postacie.</td></tr>
+</table>
+
+<h3>Mapa</h3>
+<p>Mapa nie jest planszą — powstaje z <b>kart Prowincji układanych na stole</b>. 16 Prowincji w 4 Regionach:</p>
+<table>
+<tr><th>Region</th><th>Prowincje</th></tr>
+<tr><td><b>Europa Zachodnia</b></td><td>Brytania, Belgica, Galia, Hispania</td></tr>
+<tr><td><b>Europa Środkowa</b></td><td>Germania, Panonia, Dacja, Iliria</td></tr>
+<tr><td><b>Europa Wschodnia</b></td><td>Scytia, Sarmacja, Mezja, Tracja</td></tr>
+<tr><td><b>Europa Południowa</b></td><td>Italia (Rzym), Sycylia, Grecja, Bałkany</td></tr>
+</table>
+<p>Na start: <b>Rzym kontroluje 2 Prowincje</b>, pozostałe frakcje po 1 — <b>11 Prowincji pozostaje neutralnych</b>. Kontrola całego Regionu daje dodatkową Chwałę co rundę.</p>
+<div class="box"><b>Neutralne ≠ puste.</b> Każda Prowincja ma własną Obronę, więc „ziemi niczyjej” też trzeba zdobyć w bitwie. To spowalnia zajmowanie mapy w trzy tury.</div>
+
+<h2 class="sec">3. Przebieg rozgrywki</h2>
+<h3>Tura gracza</h3>
+<ol>
+<li><b>Dochód:</b> +1 Złoto za każdą kontrolowaną Prowincję, +1 Chwały za każdy pełny Region.</li>
+<li><b>Dobór karty</b> z własnej talii (jeśli trafi się Wydarzenie — odpala się natychmiast).</li>
+<li><b>3 Akcje</b> do wykorzystania.</li>
+</ol>
+<h3>Dostępne Akcje</h3>
+<table>
+<tr><th style="width:26%">Akcja</th><th>Efekt</th></tr>
+<tr><td><b>Marsz</b></td><td>Przesuń Armię na sąsiednią, własną i pustą Prowincję.</td></tr>
+<tr><td><b>Atak</b></td><td>Zaatakuj sąsiednią Prowincję wroga lub neutralną (bitwa).</td></tr>
+<tr><td><b>Wzmocnienie / Dowódca</b></td><td>Dołącz kartę do Armii (max 1 Dowódca + 2 Wzmocnienia).</td></tr>
+<tr><td><b>Intryga / Karta specjalna</b></td><td>Zagraj kartę polityczną, sabotażową lub frakcyjną.</td></tr>
+<tr><td><b>Rekrutacja</b></td><td>Wystaw nową Armię (5 Złota; Galowie 4). Limit 3 Armie (Galowie 4).</td></tr>
+</table>
+
+<h3>Przygotowana Armia — hamulec ekspansji</h3>
+<p>Goła Armia (Siła 3) nie zdobędzie wszystkiego. To, na co możesz uderzyć, zależy od Obrony celu:</p>
+<table>
+<tr><th>Obrona celu</th><th>Wymaganie</th></tr>
+<tr><td>≤ 3</td><td>dowolna Armia</td></tr>
+<tr><td>4–5</td><td><b>Przygotowana Armia</b> — z Dowódcą albo Wzmocnieniem</td></tr>
+<tr><td>≥ 6 (np. Italia)</td><td>Dowódca <b>albo</b> 2 Wzmocnienia</td></tr>
+</table>
+<p>Dzięki temu podbój trzeba <b>przygotować</b> — zbudować wyprawę z kart, zanim ruszy się na poważny cel.</p>
+
+<h3>Koniec gry</h3>
+<p>Gra kończy się po <b>8 rundach</b> albo gdy zniknie ostatnia neutralna Prowincja. Wygrywa gracz z <b>największą liczbą Chwały</b>.</p>
+
+<h2 class="sec">4. Bitwa — serce gry</h2>
+<p>Walka nie jest porównaniem dwóch liczb. Najważniejszy jest <b>blef</b>.</p>
+<ol>
+<li><b>Deklaracja ataku</b> — wskazujesz Armię i sąsiednią Prowincję.</li>
+<li><b>Zakryte karty</b> — obie strony kładą do 2 kart <b>zakrytych</b>. Widać ile, nie widać czego. Możesz położyć śmieci i wyglądać groźnie.</li>
+<li><b>Negocjacje</b> — obietnice, groźby, przekupstwo. Niewiążące.</li>
+<li><b>Ostatnie słowo</b> — przed odkryciem: atakujący może się <b>wycofać</b>, a obrońca może zapłacić <b>OKUP w Złocie</b>, żeby go odgonić.</li>
+<li><b>Odkrycie i rozstrzygnięcie</b> — wyższa Siła wygrywa, remis dla obrońcy.</li>
+</ol>
+<div class="box"><b>Dlaczego blef działa:</b> każda zagrana zakryta karta <b>przepada</b> — prawdziwa czy nie. Blef kosztuje kartę. Przegrany atakujący traci tempo (Armia zmęczona), a przegrany obrońca traci Prowincję <b>i</b> Armię. Do tego karty-pułapki karzą tych, którzy się przepakowali. Efekt: „mam dwie karty, na pewno chcesz?” jest realną groźbą — i realnym ryzykiem.</div>
+
+<h3>Sojusze i zdrada</h3>
+<p>Gracze mogą zawierać <b>nieformalne układy</b> (nic nie znaczą mechanicznie — można obiecać wszystko) oraz <b>Formalne Sojusze</b> potwierdzone <b>Totemem</b> i kartą <b>Traktatu</b> (Pakt o nieagresji, Sojusz obronny, Wspólny wróg).</p>
+<p>Formalny Sojusz daje przywileje, ale też <b>zobowiązania</b> — i tu rodzi się najlepszy humor: musisz pomóc sojusznikowi, ale nikt nie powiedział, że pomoc musi być <i>dobra</i>. Możesz spełnić traktat, zagrywając kartę dającą zero wsparcia.</p>
+<p>Po zdradzie Totem <b>obraca się na stronę ZDRADA</b>, a zdradzony dostaje <b>Casus Belli</b> — premię do zemsty. Zdrada ma pozostać opłacalna i atrakcyjna.</p>
+
+<h2 class="sec">5. Władca i Bezkrólewie</h2>
+<p>Każda frakcja zaczyna z <b>podstawowym Władcą</b> (np. rzymski „Kolejny, Przeciętny Cesarz”) — bez bonusów, ale trzyma frakcję w porządku.</p>
+<p>Kluczowy pomysł: <b>każda Postać może pełnić trzy różne role</b>, ale tylko jedną naraz:</p>
+<ul>
+<li>leżeć jako aktywna <b>Postać</b>,</li>
+<li>być <b>Dowódcą</b> przy Armii,</li>
+<li>zasiadać na <b>tronie jako Władca</b>.</li>
+</ul>
+<p>To tworzy prawdziwe dylematy, bo <b>dobry wódz bywa fatalnym władcą</b> — np. Stilichon daje +2 Siły w Armii, ale jako cesarz kosztuje 1 Złoto na rundę.</p>
+<h3>Władca na wojnie</h3>
+<p>Władca może osobiście poprowadzić Armię: <b>+1 Siły i +1 Chwały za zwycięstwo</b>. Ale po przegranej następuje <b>test śmierci (k6)</b>: 1–2 ginie, 3–4 ranny, 5–6 ucieka. To sytuacja, w której reszta stołu natychmiast zaczyna kombinować, jak go zabić.</p>
+<h3>Bezkrólewie</h3>
+<p>Śmierć Władcy wprowadza frakcję w <b>Bezkrólewie</b>. Co turę rzucasz k6 — przy 6 wraca zwykły władca. Albo <b>mianujesz aktywną Postać</b>, kończąc kryzys natychmiast… tracąc ją jako Dowódcę.</p>
+
+<h2 class="sec">6. Frakcje</h2>
+<div class="fac" style="border-color:#7a1f1f"><h3>Zachodnie Cesarstwo Rzymskie</h3>
+<div class="id">„Wszystko płonie, ale nadal jesteśmy cywilizowani.”</div>
+<p><b>DEKADENCJA.</b> Startuje najsilniej, ale imperium gnije — za każdą Prowincję ponad trzy rośnie Dekadencja, a po przekroczeniu progu wybucha bunt i Rzym traci ziemię. <b>Chwałę zdobywa za przetrwanie</b>: +2 co rundę za utrzymanie Italii, +1 za trzymanie Dekadencji w ryzach. Styl: obrona, kupowanie czasu, dobieranie kart, gdy wszystko się wali.</p></div>
+
+<div class="fac" style="border-color:#2f5f3a"><h3>Goci</h3>
+<div class="id">„Nie wiemy, gdzie się osiedlimy, ale na pewno nie tutaj.”</div>
+<p><b>WIELKA WĘDRÓWKA.</b> Seria podbojów wzmacnia Armię (+1 Siły za punkt serii). <b>Chwała za pęd</b>: każdy podbój daje tyle Chwały, ile długa jest seria. Postój bez podboju kasuje wszystko. Styl: agresja, tempo, ciągły ruch naprzód.</p></div>
+
+<div class="fac" style="border-color:#3a2a55"><h3>Wandalowie</h3>
+<div class="id">„To nie jest nasze. Jeszcze.”</div>
+<p><b>ZŁUPIĆ I SPALIĆ.</b> Po zwycięstwie mogą zamiast zająć Prowincję — <b>złupić ją</b>: +2 Złota i +2 Chwały, a ziemia zostaje Spustoszona. Złupienie Rzymu to jackpot („Wakacje w Rzymie”). <b>Chwała za łup, nie za trzymanie ziemi.</b> Styl: rajdy, chaos, ekonomia z grabieży.</p></div>
+
+<div class="fac" style="border-color:#1f4d6b"><h3>Galowie</h3>
+<div class="id">„Zjednoczymy się przeciw wspólnemu wrogowi. Potem zobaczymy.”</div>
+<p><b>KONFEDERACJA.</b> Mogą wystawić więcej Armii (do 4) i taniej. <b>Chwała za wodzów</b>: +1 co rundę za każdą Armię ponad pierwszą. Talia pełna kłótliwych wodzów o sprzecznych interesach. Styl: elastyczność, liczebność, wewnętrzny bałagan.</p></div>
+
+<h2 class="sec">7. System kart</h2>
+<p>Każda frakcja ma <b>własną talię 36 kart</b> zbudowaną na tym samym szkielecie archetypów — ale każda mówi tym językiem po swojemu. Dzięki temu talie są spójne mechanicznie i różne w odbiorze.</p>
+<table>
+<tr><th style="width:34%">Kategoria</th><th style="width:12%">Ilość</th><th>Rola</th></tr>
+<tr><td><b>Postacie</b></td><td>6</td><td>Dowódcy / kandydaci na Władcę. Podwójna rola, podwójne dylematy.</td></tr>
+<tr><td><b>Wzmocnienia Armii</b></td><td>8</td><td>Trwale doczepiane do Armii, budują jej potencjał.</td></tr>
+<tr><td><b>Taktyki i Reakcje</b></td><td>10</td><td>Zagrywane w bitwie, często zakryte. Tu mieszka blef.</td></tr>
+<tr><td><b>Karty Specjalne</b></td><td>12</td><td>Frakcyjne sztuczki: Złoto, dobór kart, polityka, kryzysy.</td></tr>
+</table>
+<p class="small">Łącznie: <b>144 karty frakcyjne</b> + 9 Wydarzeń + 4 Władców podstawowych. W prototypie każda karta ma realny, zaprogramowany efekt — treść karty naprawdę wpływa na grę.</p>
+
+<h3>Przykłady (dla klimatu)</h3>
+<ul>
+<li><b>ZAGINIENI KOMANDOSI SPOD LASU TEUTOBURSKIEGO</b> (Rzym) — +2 Siły, w Germanii +1. Wyszli z krzaków po 400 latach.</li>
+<li><b>CESARZ IDIOTA</b> (Rzym) — jako Władca: bałagan, −1 Złota na rundę. Trzyma mapę do góry nogami.</li>
+<li><b>KUZYNI, O KTÓRYCH NIKT NIE PYTAŁ</b> (Goci) — +2 Siły. Za każdym wojownikiem stoją kolejni identyczni.</li>
+<li><b>WAKACJE W RZYMIE</b> (Wandalowie) — +1 Chwały. Zwiedzanie połączone z grabieżą.</li>
+<li><b>KAŻDY UWAŻA, ŻE TERAZ JEGO KOLEJ</b> (Galowie) — kończy Bezkrólewie; ktoś w końcu przekrzyczy resztę.</li>
+<li><b>POZORY MOCY</b> (Rzym) — nie robi nic. Ale wygląda dostojnie. <i>(karta czystego blefu)</i></li>
+</ul>
+
+<h2 class="sec">8. Stan prototypu</h2>
+<p>Istnieje <b>działający prototyp cyfrowy</b> — jeden plik HTML, uruchamiany w przeglądarce, bez instalacji. Powstał po to, żeby dało się testować grę <b>bez kompletowania czterech osób przy stole</b>.</p>
+<div class="box"><b>Kluczowa rzecz:</b> trzema przeciwnikami steruje <b>sztuczna inteligencja (Claude)</b>. Frakcje AI naprawdę rozmawiają po polsku, negocjują, blefują, składają obietnice i je łamią — dzięki temu można sprawdzić <i>społeczną</i> warstwę gry w pojedynkę.</div>
+
+<h3>Co już działa</h3>
+<ul>
+<li>Pełna mapa 16 Prowincji w 4 Regionach + <b>faza układania stołu</b> (prowincje przeciąga się myszką, żeby testować różne układy).</li>
+<li>Cztery pełne talie po 36 kart — <b>każda karta z realnym, działającym efektem</b>.</li>
+<li>Bitwa z zakrytymi kartami, negocjacją, okupem i pułapkami.</li>
+<li>System Władcy, Bezkrólewia i sukcesji.</li>
+<li>Sojusze formalne, Totem, zdrada i Casus Belli.</li>
+<li>Dochód, rekrutacja, ograniczenia ekspansji, warunek końca gry i punktacja.</li>
+<li>Animacje kart wykładanych na stół i czytelne pokazywanie efektów (żywa Siła Armii, przyrost zasobów).</li>
+</ul>
+
+<h3>Weryfikacja</h3>
+<p>Przeprowadzono <b>automatyczną symulację pełnej partii</b> (wszystkie 4 frakcje, 8 rund): gra rozegrała się do wyłonienia zwycięzcy, z 43 bitwami, działającymi kartami i wydarzeniami — <b>bez ani jednego błędu</b>. Osobno potwierdzono na żywo, że frakcje AI faktycznie rozmawiają i podejmują sensowne decyzje.</p>
+
+<h3>Technologia</h3>
+<div class="kv"><div class="k">Forma</div><div>Jeden plik <code>index.html</code> (~140 KB), bez instalacji i bez zależności.</div></div>
+<div class="kv"><div class="k">Uruchomienie</div><div>Otwarcie pliku w przeglądarce albo prosty lokalny serwer.</div></div>
+<div class="kv"><div class="k">AI przeciwników</div><div>Model Claude wywoływany bezpośrednio z przeglądarki (wymaga klucza API — bez niego gra działa z prostym botem).</div></div>
+<div class="kv"><div class="k">Repozytorium</div><div>github.com/piotrek1115/europe-up-to-grabs</div></div>
+
+<h2 class="sec">9. Kierunek artystyczny</h2>
+<p>Styl: <b>stylizowana ilustracja</b> — ciepła, ziemista paleta, grube atramentowe kontury, płaskie lub lekko malarskie cieniowanie. Klimat ludowo-średniowiecznej ryciny połączony z <b>przysadzistymi, zabawnymi postaciami</b> (krępi Rzymianie w pióropuszach, barczyści barbarzyńcy). Dramatycznie, ale z humorem — <b>bez historycznej dokładności</b>.</p>
+<p><b>Paleta:</b> pergamin, rdzawa czerwień, palony pomarańcz, ochra i złoto, głęboki brąz, przygaszona zieleń, ciemny fiolet, węgiel.</p>
+<p><b>Zasady kompozycji:</b> jeden czytelny bohater lub gag w centrum; ilustracja ma „opowiedzieć” efekt karty w pół sekundy; humor wynika z <i>sytuacji</i>, nie z karykatury; tło proste, żeby karta była czytelna w małym rozmiarze.</p>
+<p class="small">Do projektu powstała osobna <b>biblia kart</b> (<code>KARTY-ART.html</code>) — 183 pozycje: każda karta, Prowincja i komponent z nazwą, mechaniką i gotowym opisem ilustracji do narysowania.</p>
+
+<h2 class="sec">10. Plan dalszych prac</h2>
+<table>
+<tr><th style="width:34%">Zadanie</th><th>Opis</th></tr>
+<tr><td><b>Balans</b></td><td>Rozegranie partii i wyrównanie siły czterech talii. Świadomie odłożone — najpierw grywalność, potem liczby.</td></tr>
+<tr><td><b>Attyla</b></td><td>Attyla jako niezależna potęga: gracze przekupują go, żeby uderzył w kogoś innego. Licytacja przy stole.</td></tr>
+<tr><td><b>Edytowalne sąsiedztwo</b></td><td>Obecnie układ prowincji na stole jest wizualny; docelowo ma realnie zmieniać, kto z kim graniczy.</td></tr>
+<tr><td><b>Pole aktywnych Postaci</b></td><td>Wykładanie bohaterów przed sobą (limit 2) przed przypisaniem ich do Armii lub tronu.</td></tr>
+<tr><td><b>Warstwa graficzna</b></td><td>Ilustracje kart wg biblii kart, docelowy layout kart i planszy.</td></tr>
+<tr><td><b>Testy z ludźmi</b></td><td>Weryfikacja tego, czego nie sprawdzi AI: realnej dynamiki negocjacji i zdrad przy stole.</td></tr>
+</table>
+
+<h2 class="sec">11. Podsumowanie</h2>
+<p>Projekt ma <b>domkniętą koncepcję</b> (tożsamość, ton, cztery asymetryczne frakcje, komplet zasad) oraz <b>grywalny prototyp cyfrowy</b>, w którym można rozegrać pełną partię przeciwko trzem przeciwnikom sterowanym przez AI. Zasady są zaimplementowane i przetestowane automatycznie, a wszystkie 144 karty frakcyjne mają realne efekty.</p>
+<p>Przed nami przede wszystkim <b>balans</b>, <b>testy z żywymi graczami</b> i <b>warstwa graficzna</b> — czyli praca, której nie da się wykonać „na sucho”, tylko przy stole i na papierze.</p>
+
+<footer>
+Europe: Up To Grabs! — dokumentacja projektu (wersja prototypowa). Tytuł roboczy PL: Barbarzyńcy u Bram.<br>
+Dokument opisuje stan projektu na moment wygenerowania. Kod i materiały: github.com/piotrek1115/europe-up-to-grabs
+</footer>
+
+</body></html>
