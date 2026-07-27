@@ -14,7 +14,7 @@
 html,body{margin:0;height:100%;overflow:hidden;font-family:'Special Elite',serif;color:var(--ink);
   background:#3a3226;}
 #table{position:fixed;inset:0;background:#f5f3ee;overflow:hidden;}
-#links{position:absolute;inset:0;pointer-events:none;z-index:1;}
+#links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;}
 /* stos kart w środku stołu */
 #deck{position:absolute;left:45%;top:38%;z-index:2;width:76px;height:102px;}
 #deck .dcard{position:absolute;inset:0;border-radius:7px;border:2px solid #7a2d22;
@@ -286,26 +286,28 @@ const REGIONS = {
   wschod:{name:"Europa Wschodnia", provs:["scytia","sarmacja","mezja","tracja"], tag:[88,29]},
 };
 const PROV = {
-  // ŚRODEK (góra-środek, 2×2)
-  germania:{name:"Germania", region:"srodek", def:4, x:40,y:5, rot:-1.5},
-  panonia: {name:"Panonia",  region:"srodek", def:4, x:48,y:5, rot:1},
-  dacja:   {name:"Dacja",    region:"srodek", def:5, x:40,y:18, rot:1.5},
-  iliria:  {name:"Iliria",   region:"srodek", def:3, x:48,y:18, rot:-1},
-  // ZACHÓD (lewa, 2×2)
-  brytania:{name:"Brytania", region:"zachod", def:2, x:8,y:33, rot:-1.5},
-  belgica: {name:"Belgica",  region:"zachod", def:3, x:16,y:33, rot:1},
-  galia:   {name:"Galia",    region:"zachod", def:4, x:8,y:46, rot:1},
-  hispania:{name:"Hispania", region:"zachod", def:3, x:16,y:46, rot:-1.5},
-  // WSCHÓD (prawa, 2×2)
-  scytia:  {name:"Scytia",   region:"wschod", def:3, x:73,y:33, rot:1.5},
-  sarmacja:{name:"Sarmacja", region:"wschod", def:4, x:81,y:33, rot:-1},
-  mezja:   {name:"Mezja",    region:"wschod", def:4, x:73,y:46, rot:-1.5},
-  tracja:  {name:"Tracja",   region:"wschod", def:5, x:81,y:46, rot:1},
-  // POŁUDNIE (dół-środek, 2×2)
-  italia:  {name:"Italia (Rzym)", region:"poludnie", def:6, x:40,y:60, rot:-1},
-  sycylia: {name:"Sycylia",  region:"poludnie", def:3, x:48,y:60, rot:1.5},
-  grecja:  {name:"Grecja",   region:"poludnie", def:4, x:40,y:73, rot:1},
-  balkany: {name:"Bałkany",  region:"poludnie", def:4, x:48,y:73, rot:-1.5},
+  // Domyślny układ = siatka 4×4, KOLUMNA = REGION (Zachód | Środek | Południe | Wschód).
+  // Sąsiedztwo wynika z odległości: pion = w regionie, poziom = z sąsiednim regionem. Można dowolnie przestawiać w setupie.
+  // ZACHÓD (kolumna x18)
+  brytania:{name:"Brytania", region:"zachod", def:2, x:18,y:12, rot:-1.5},
+  belgica: {name:"Belgica",  region:"zachod", def:3, x:18,y:30, rot:1},
+  galia:   {name:"Galia",    region:"zachod", def:4, x:18,y:48, rot:-1},
+  hispania:{name:"Hispania", region:"zachod", def:3, x:18,y:66, rot:1.5},
+  // ŚRODEK (kolumna x39)
+  germania:{name:"Germania", region:"srodek", def:4, x:39,y:12, rot:1},
+  panonia: {name:"Panonia",  region:"srodek", def:4, x:39,y:30, rot:-1.5},
+  dacja:   {name:"Dacja",    region:"srodek", def:5, x:39,y:48, rot:1.5},
+  iliria:  {name:"Iliria",   region:"srodek", def:3, x:39,y:66, rot:-1},
+  // POŁUDNIE (kolumna x60)
+  italia:  {name:"Italia (Rzym)", region:"poludnie", def:6, x:60,y:12, rot:-1},
+  sycylia: {name:"Sycylia",  region:"poludnie", def:3, x:60,y:30, rot:1.5},
+  grecja:  {name:"Grecja",   region:"poludnie", def:4, x:60,y:48, rot:-1},
+  balkany: {name:"Bałkany",  region:"poludnie", def:4, x:60,y:66, rot:1},
+  // WSCHÓD (kolumna x81)
+  scytia:  {name:"Scytia",   region:"wschod", def:3, x:81,y:12, rot:1.5},
+  sarmacja:{name:"Sarmacja", region:"wschod", def:4, x:81,y:30, rot:-1},
+  mezja:   {name:"Mezja",    region:"wschod", def:4, x:81,y:48, rot:1},
+  tracja:  {name:"Tracja",   region:"wschod", def:5, x:81,y:66, rot:-1.5},
 };
 const ADJ_RAW = {
   brytania:["belgica","galia"],
@@ -328,6 +330,15 @@ const ADJ_RAW = {
 const ADJ={};
 Object.keys(ADJ_RAW).forEach(a=>{ADJ[a]=new Set(ADJ_RAW[a])});
 Object.keys(ADJ_RAW).forEach(a=>ADJ_RAW[a].forEach(b=>ADJ[b].add(a)));
+// --- SĄSIEDZTWO Z UKŁADU ---  prowincje blisko siebie graniczą; graf zamrażany przy STARCIE (S.adj)
+const ADJ_THRESH=22.5; // próg sąsiedztwa w jednostkach % (odległość środków kart); niezależny od rozmiaru okna
+function provDist(a,b){ return Math.hypot(S.prov[a].px-S.prov[b].px, S.prov[a].py-S.prov[b].py); }
+function deriveAdj(){ const ps=Object.keys(PROV), g={}; ps.forEach(p=>g[p]=[]);
+  for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.length;j++){ const a=ps[i],b=ps[j]; if(provDist(a,b)<ADJ_THRESH){ g[a].push(b); g[b].push(a); } }
+  ps.forEach(a=>{ if(!g[a].length){ let best=null,bd=1e9; ps.forEach(b=>{ if(b!==a){ const d=provDist(a,b); if(d<bd){bd=d;best=b;} } }); if(best){ g[a].push(best); if(!g[best].includes(a))g[best].push(a); } } });
+  return g; }
+function adjOf(p){ if(S&&S.adj&&S.adj[p]) return new Set(S.adj[p]); return ADJ[p]||new Set(); }
+function curAdj(){ return (S&&S.phase==="play"&&S.adj)?S.adj:deriveAdj(); }
 
 const FACTIONS = {
   rome:  {name:"Zachodnie Cesarstwo", short:"Rzym", color:"var(--rome)", raw:"#7a1f1f",
@@ -585,7 +596,7 @@ function makeDeck(f){ let d; if(FULL_DECK[f]){ d=FULL_DECK[f].slice(); } else { 
 
 const CHAOS=[
  {n:"CESARZ ZNOWU NIE ŻYJE", d:"Rzym traci cesarza: +2 Dekadencji, -1 Złota.", fn:s=>{s.f.rome.dek+=2;s.f.rome.gold=Math.max(0,s.f.rome.gold-1)}},
- {n:"BARBARZYŃCY U BRAM", d:"Każda frakcja z Armią przy Italii dostaje +1 Złota.", fn:s=>{alive().forEach(k=>{ if(armiesOf(k).some(a=>ADJ["italia"].has(a.loc)||a.loc==="italia")) s.f[k].gold++ })}},
+ {n:"BARBARZYŃCY U BRAM", d:"Każda frakcja z Armią przy Italii dostaje +1 Złota.", fn:s=>{alive().forEach(k=>{ if(armiesOf(k).some(a=>adjOf("italia").has(a.loc)||a.loc==="italia")) s.f[k].gold++ })}},
  {n:"PLAGA", d:"Każdy traci 1 Złota (albo 1 Chwałę).", fn:s=>{alive().forEach(k=>{ if(s.f[k].gold>0)s.f[k].gold--; else s.f[k].glory=Math.max(0,s.f[k].glory-1)})}},
  {n:"WIELKA MIGRACJA", d:"Poruszające się Armie odzyskują możliwość ruchu. Rusz się albo giń.", fn:s=>{s.armies.forEach(a=>a.moved=false)}},
  {n:"OSTRA ZIMA", d:"W tej rundzie nikt nie może Rekrutować.", fn:s=>{s.noRecruit=true}},
@@ -629,6 +640,7 @@ function newState(player){
 const START_OWN={ rome:["italia","grecja"], goths:["panonia"], vandals:["germania"], gauls:["galia"] };
 function beginPlay(){
   if(!S||S.phase!=="setup") return;
+  S.adj=deriveAdj(); // ZAMROŻENIE sąsiedztwa z ułożenia stołu — od teraz to ono rządzi ruchem/atakami
   S.phase="play";
   for(const k in START_OWN) START_OWN[k].forEach(p=>S.prov[p].owner=k);
   addArmy("rome","italia","Legiony Italii"); addArmy("goths","panonia","I Armia Gotów");
@@ -651,10 +663,10 @@ function resolveEvent(c,k){ const cd=CARDS[c]; talkSys(`🎲 WYDARZENIE (dobrał
 /* ===================== RENDER ===================== */
 const T=document.getElementById("table"), SVG=document.getElementById("links");
 function pxX(p){return p*T.clientWidth/100} function pxY(p){return p*T.clientHeight/100}
-function renderLinks(){ if(!S)return; let seen=new Set(), lines="";
-  for(const a in ADJ_RAW) for(const b of ADJ_RAW[a]){ let key=[a,b].sort().join("-"); if(seen.has(key))continue; seen.add(key);
+function renderLinks(){ if(!S)return; const g=curAdj(); let seen=new Set(), lines=""; const setup=S.phase==="setup";
+  for(const a in g) for(const b of g[a]){ let key=[a,b].sort().join("-"); if(seen.has(key))continue; seen.add(key);
     let x1=pxX(S.prov[a].px)+40,y1=pxY(S.prov[a].py)+53,x2=pxX(S.prov[b].px)+40,y2=pxY(S.prov[b].py)+53;
-    lines+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#6b5a3d" stroke-width="2" stroke-dasharray="2 5" opacity="0.4"/>`; }
+    lines+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${setup?'#8a2b22':'#6b5a3d'}" stroke-width="${setup?2.5:2}" stroke-dasharray="2 5" opacity="${setup?0.65:0.4}"/>`; }
   SVG.innerHTML=lines; }
 function render(){
   if(!S) return;
@@ -698,7 +710,7 @@ function makeProvDraggable(el,p){ el.style.cursor="grab";
 function renderSetup(){ let bar=document.getElementById("setupbar");
   if(!S||S.phase!=="setup"){ if(bar)bar.remove(); return; }
   if(!bar){ bar=document.createElement("div"); bar.id="setupbar"; document.body.appendChild(bar); }
-  bar.innerHTML=`<span>🗺️ <b>UKŁADANIE STOŁU</b> — przeciągnij prowincje jak chcesz (i talię na środku). Gdy gotowe:</span>
+  bar.innerHTML=`<span>🗺️ <b>UKŁADANIE STOŁU</b> — przeciągaj prowincje: <b>te blisko siebie graniczą</b> (czerwone linie = kto z kim sąsiaduje). Układ = mapa. Gdy gotowe:</span>
     <button class="btn ghost" id="setupDefault">↺ Domyślny układ</button>
     <button class="btn" id="setupStart">▶ ROZPOCZNIJ GRĘ</button>`;
   bar.querySelector("#setupStart").onclick=beginPlay;
@@ -789,7 +801,7 @@ function onArmyClick(a){
 }
 function highlightMoves(a){
   [...T.querySelectorAll(".prov")].forEach(el=>{ const p=el.dataset.p;
-    if(!ADJ[a.loc].has(p)) return;
+    if(!adjOf(a.loc).has(p)) return;
     const o=S.prov[p].owner, occupant=armyAt(p);
     if(a.blocked){ return; }
     if(o===S.player && !occupant){ el.classList.add("march"); }
@@ -803,7 +815,7 @@ function clearSel(){ sel=null; [...T.querySelectorAll(".tgt,.tgtlock,.march,.sel
 function onProv(p){
   if(busy||S.over) return;
   if(sel && sel.type==="army"){ const a=sel.a;
-    if(!ADJ[a.loc].has(p)){ clearSel(); return; }
+    if(!adjOf(a.loc).has(p)){ clearSel(); return; }
     if(a.blocked){ toast("Ta Armia nie może się ruszyć w tej turze."); return; }
     const o=S.prov[p].owner, occupant=armyAt(p);
     if(o===S.player && !occupant){ doMarch(a,p); }
@@ -860,7 +872,7 @@ function promptIntrigue(c){
      showMsg(`<h2>${cd.n}</h2><p>${cd.d}</p><div class="opts">`+targets.map(a=>`<div class="opt" data-id="${a.id}"><b>${a.name}</b> (${FACTIONS[a.f].short}) w ${PROV[a.loc].name}</div>`).join("")+`</div>`,
        el=>el.querySelectorAll(".opt").forEach(o=>o.onclick=()=>{ closeMsg(); doIntrigue(c,{armyId:+o.dataset.id}); })); }
   else if(cd.eff==="tearbanner"){ let myProvs=Object.keys(PROV).filter(p=>S.prov[p].owner===S.player);
-     let targets=Object.keys(PROV).filter(p=>{ let o=S.prov[p].owner; return o&&o!==S.player&&!armyAt(p)&&myProvs.some(mp=>ADJ[mp].has(p)); });
+     let targets=Object.keys(PROV).filter(p=>{ let o=S.prov[p].owner; return o&&o!==S.player&&!armyAt(p)&&myProvs.some(mp=>adjOf(mp).has(p)); });
      if(!targets.length){ toast("Brak celu: potrzebna wroga prowincja bez Armii, sąsiadująca z twoją."); clearSel(); document.querySelectorAll(".hcard").forEach(e=>e.classList.remove("sel")); return; }
      showMsg(`<h2>${cd.n}</h2><p>${cd.d}</p><div class="opts">`+targets.map(p=>`<div class="opt" data-p="${p}"><b>${PROV[p].name}</b> (${FACTIONS[S.prov[p].owner].short})</div>`).join("")+`</div>`,
        el=>el.querySelectorAll(".opt").forEach(o=>o.onclick=()=>{ closeMsg(); doIntrigue(c,{prov:o.dataset.p}); })); }
@@ -942,7 +954,7 @@ function makeDraggable(el,a){
     const mm=ev=>{ let dx=ev.clientX-sx,dy=ev.clientY-sy; if(Math.abs(dx)+Math.abs(dy)>5){el.classList.add("dragging");el.dataset.dragged="1";}
       el.style.left=(ox+dx/T.clientWidth*100)+"%"; el.style.top=(oy+dy/T.clientHeight*100)+"%"; };
     const mu=ev=>{ document.removeEventListener("mousemove",mm); document.removeEventListener("mouseup",mu); el.classList.remove("dragging");
-      if(el.dataset.dragged==="1"){ let tp=provUnder(ev.clientX,ev.clientY); if(tp&&ADJ[a.loc].has(tp)){ onProv(tp); } else { render(); } }
+      if(el.dataset.dragged==="1"){ let tp=provUnder(ev.clientX,ev.clientY); if(tp&&adjOf(a.loc).has(tp)){ onProv(tp); } else { render(); } }
       setTimeout(()=>{delete el.dataset.dragged;},50); };
     document.addEventListener("mousemove",mm); document.addEventListener("mouseup",mu);
   });
@@ -1238,7 +1250,7 @@ function describeState(fk){
   let lines=[];
   lines.push("PROWINCJE:");
   for(const p in PROV){ const o=S.prov[p].owner; const a=armyAt(p);
-    lines.push(`- ${p} (${PROV[p].name}, Obrona ${effDef(p)}, region ${PROV[p].region}): ${o?"włada "+FACTIONS[o].short:(S.prov[p].spoiled?"SPUSTOSZONA":"niczyja")}${a?", stoi Armia #"+a.id+" "+FACTIONS[a.f].short+" (Siła "+armyStr(a)+")":""}. Sąsiedzi: ${[...ADJ[p]].join(", ")}`);
+    lines.push(`- ${p} (${PROV[p].name}, Obrona ${effDef(p)}, region ${PROV[p].region}): ${o?"włada "+FACTIONS[o].short:(S.prov[p].spoiled?"SPUSTOSZONA":"niczyja")}${a?", stoi Armia #"+a.id+" "+FACTIONS[a.f].short+" (Siła "+armyStr(a)+")":""}. Sąsiedzi: ${[...adjOf(p)].join(", ")}`);
   }
   lines.push("\nTWOJE ARMIE:");
   armiesOf(fk).forEach(a=>lines.push(`- #${a.id} ${a.name} w ${a.loc}, Siła ${armyStr(a)}${a.cmd?", Dowódca":""}, Wzmocnień ${a.reinf.length}/2${a.moved?", już się ruszyła":""}${a.blocked?", ZABLOKOWANA":""}`));
@@ -1253,10 +1265,10 @@ function describeState(fk){
 async function execAIAction(fk,act){
   try{
     if(!act||!act.type||act.type==="pass") return false;
-    if(act.type==="march"){ let a=armyById(act.armyId); if(!a||a.f!==fk||a.blocked) return false; if(!ADJ[a.loc].has(act.to))return false;
+    if(act.type==="march"){ let a=armyById(act.armyId); if(!a||a.f!==fk||a.blocked) return false; if(!adjOf(a.loc).has(act.to))return false;
       const o=S.prov[act.to].owner,occ=armyAt(act.to); if(occ||o!==fk)return false; // marsz tylko po WŁASNYCH pustych; neutralne trzeba zdobyć bitwą
       a.loc=act.to; a.moved=true; return true; }
-    if(act.type==="attack"){ let a=armyById(act.armyId); if(!a||a.f!==fk||a.blocked)return false; if(!ADJ[a.loc].has(act.to))return false;
+    if(act.type==="attack"){ let a=armyById(act.armyId); if(!a||a.f!==fk||a.blocked)return false; if(!adjOf(a.loc).has(act.to))return false;
       const o=S.prov[act.to].owner,occ=armyAt(act.to); if(o===fk)return false;
       if(occ&&occ.f===fk)return false;
       if(!attackGate(a,act.to).ok) return false;
@@ -1272,7 +1284,7 @@ async function execAIAction(fk,act){
       const t=act.target||{}; const fx=()=>{ const to=t.prov?provXY(t.prov):(t.armyId?armyXY(t.armyId):null); fxPlay(c,fk,to); if(t.prov)hitSel('.prov[data-p="'+t.prov+'"]'); };
       if(cd.eff==="bribe"&&t.faction&&S.f[t.faction]){ let amt=Math.min(2,S.f[t.faction].gold);S.f[t.faction].gold-=amt;S.f[fk].gold+=amt;S.f[fk].hand.splice(i,1);fx(); if(amt>0){const cx=matXY(fk)||_rc(document.querySelector('#enemies .echip[data-k="'+fk+'"]'));if(cx)floatGain("+"+amt+" 💰",cx,"#b8860b"); const tx=matXY(t.faction)||_rc(document.querySelector('#enemies .echip[data-k="'+t.faction+'"]'));if(tx)floatGain("-"+amt+" 💰",tx,"#8a2b22");} return true; }
       if(cd.eff==="nomove"&&t.armyId){ let a=armyById(t.armyId); if(a&&a.f!==fk){a.blocked=true;S.f[fk].hand.splice(i,1);fx();return true;} }
-      if(cd.eff==="tearbanner"&&t.prov){ let p=t.prov; if(S.prov[p].owner&&S.prov[p].owner!==fk&&!armyAt(p)&&[...ADJ[p]].some(n=>S.prov[n].owner===fk)){S.prov[p].owner=null;S.f[fk].hand.splice(i,1);fx();return true;} }
+      if(cd.eff==="tearbanner"&&t.prov){ let p=t.prov; if(S.prov[p].owner&&S.prov[p].owner!==fk&&!armyAt(p)&&[...adjOf(p)].some(n=>S.prov[n].owner===fk)){S.prov[p].owner=null;S.f[fk].hand.splice(i,1);fx();return true;} }
       if(cd.eff==="sabotage"&&t.prov&&S.prov[t.prov]&&S.prov[t.prov].owner&&S.prov[t.prov].owner!==fk){ S.prov[t.prov].wallBonus=(S.prov[t.prov].wallBonus||0)-1; S.f[fk].hand.splice(i,1); fx(); return true; }
       if(cd.eff==="spy"&&t.faction&&S.f[t.faction]){ S.f[fk].hand.splice(i,1); fxPlay(c,fk,null); return true; }
       return false; }
