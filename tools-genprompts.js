@@ -80,7 +80,7 @@ while((c=cardRe.exec(h))){
   const acc=ACC[f]||"";
   const isBoard=/PLANSZA REGIONU/.test(name);
   const comp=isBoard
-    ? "REGION BOARD: a play-mat that four province cards are laid onto — atmosphere lives at the EDGES, the centre stays calm and light; four EMPTY UNLABELLED card areas in a 2x2 grid, plus an empty clear title bar across the top"
+    ? "REGION BOARD: a play-mat that four province cards are laid onto — atmosphere lives at the EDGES, the centre stays calm and light; four EMPTY BLANK card slots in a 2x2 grid, each slot a tall rectangle of 3:4 proportion, the whole grid filling about 65% of the board; plus one blank horizontal banner shape at the top left completely empty"
     : (TYPE[badge]|| (f==="provinces"?"":TYPE["KARTA SPECJALNA"]));
   const ar = isBoard?"--ar 3:4" : f==="provinces"?AR.province : f==="components"?AR.component : AR.card;
   // subject = polski opis ilustracji (autorska treść) + akcent + kompozycja + styl
