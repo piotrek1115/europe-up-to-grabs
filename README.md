@@ -26,8 +26,8 @@ Gra to jeden plik: **`index.html`**. Dwie opcje:
 
 ## Co jest zrobione
 
-- **Mapa 16 prowincji / 4 regiony** (Zachód, Środek, Wschód, Południe) w układzie rombu; neutralne ≠ puste (własna Obrona 2–6).
-- **Faza SETUP** — przed grą przeciągasz prowincje i talię jak chcesz, potem „ROZPOCZNIJ GRĘ" rozdaje ręce i stawia armie.
+- **Mapa = 4 bloki regionów po 4 prowincje** (Zachód, Środek, Południe, Wschód); neutralne ≠ puste (własna Obrona 2–6). Każdy region to fizyczny kontener z 4 slotami i własnym klimatem graficznym (mgła / lasy / antyk / step i mróz).
+- **Faza SETUP + sąsiedztwo z układu** — przesuwasz **całe bloki regionów**; wewnątrz regionu wszystkie 4 prowincje graniczą ze sobą, a **stykające się bloki** tworzą granice między regionami. Układ zamraża się przy „ROZPOCZNIJ GRĘ" (`S.adj`) i od tej pory rządzi ruchem i atakami. Silnik pilnuje, żeby mapa zawsze była spójna (dokleja rozłączne kawałki).
 - **Przygotowana Armia** — atak bramkowany Obroną (≤3 dowolna, 4–5 wymaga Dowódcy/Wzmocnienia, ≥6 Dowódcy albo 2 Wzmocnień).
 - **Dochód** (+1 Złoto/prowincję, +1 Chwały/pełny region), **3 akcje/turę**, dobór karty na starcie tury.
 - **System Władcy / Bezkrólewie** — Postać jako Dowódca albo Władca; Władca w Armii ryzykuje śmiercią (k6); Bezkrólewie kończy k6=6 albo mianowanie.
@@ -41,10 +41,15 @@ Gra to jeden plik: **`index.html`**. Dwie opcje:
 
 - **Attyla-najemnik → pełna licytacja** (event z przekupstwem, kto go skieruje).
 - **Balans** czterech talii na żywych partiach.
-- **Edytowalne sąsiedztwo** — obecnie przesuwanie prowincji zmienia tylko wygląd; graf `ADJ` (kto z kim graniczy) jest stały.
 - **Pole aktywnych Postaci** (wykładanie bohaterów przed sobą, max 2).
+- **Grafiki** — opisy i gotowe prompty czekają w `KARTY-ART.html` i `PROMPTY-KART.html`.
 - Zrównanie opisów kart z mechaniką jest zrobione; parę „ruchowych" gockich efektów jest uproszczonych (płaskie), nie kłamią.
 
 ## Sterowanie (diegetyczne, bez dashboardu)
 
-Klik Armii → klik prowincji (marsz/atak). Klik karty w ręce → klik Armii (Dowódca/Wzmocnienie) albo cel (intryga/specjalna). Dwuklik własnej ziemi = Rekrutacja. Klik maty AI = dyplomacja. Klik Totemu = zdrada. Klik własnej maty = Dwór (Władca). Pieczęć = Zakończ turę.
+W SETUPie: przeciągasz **bloki regionów** (karty w środku jadą razem) i talię. W grze: klik Armii → klik prowincji (marsz/atak). Klik karty w ręce → klik Armii (Dowódca/Wzmocnienie) albo cel (intryga/specjalna). Dwuklik własnej ziemi = Rekrutacja. Klik maty AI = dyplomacja. Klik Totemu = zdrada. Klik własnej maty = Dwór (Władca). Pieczęć = Zakończ turę.
+
+## Materiały graficzne
+
+- **`KARTY-ART.html`** — biblia kart: nazwa, realna mechanika i opis ilustracji do narysowania, z pustym slotem na szkic.
+- **`PROMPTY-KART.html`** — 187 gotowych promptów do generatora (klik = kopiuj). Każdy = opis sceny + akcent frakcji + kompozycja typu karty + wspólne „DNA stylu”, żeby cała seria trzymała jedną stylistykę.

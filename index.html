@@ -14,7 +14,7 @@
 html,body{margin:0;height:100%;overflow:hidden;font-family:'Special Elite',serif;color:var(--ink);
   background:#3a3226;}
 #table{position:fixed;inset:0;background:#f5f3ee;overflow:hidden;}
-#links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+#links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;} /* nad blokami, pod kartami */
 /* stos kart w środku stołu */
 #deck{position:absolute;left:45%;top:38%;z-index:2;width:76px;height:102px;}
 #deck .dcard{position:absolute;inset:0;border-radius:7px;border:2px solid #7a2d22;
@@ -26,21 +26,57 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:'Special Elite',serif
   font-family:'IM Fell English SC';color:#f2e2c0;font-size:15px;text-align:center;line-height:1.1;letter-spacing:1px}
 #chaosdeck{position:absolute;left:44%;top:34%;z-index:2;}
 
+/* ===== BLOKI REGIONÓW — kontener z 4 slotami, każdy region ma własny klimat ===== */
+.regionbox{position:absolute;z-index:1;border-radius:11px;border:2px solid;overflow:hidden;
+  box-shadow:0 4px 12px rgba(60,45,25,.20), inset 0 0 46px rgba(255,255,255,.28);
+  transition:box-shadow .12s;}
+.regionbox:after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.45;}
+.rbhead{position:relative;z-index:2;padding:5px 6px 0;text-align:center;line-height:1;}
+.rbname{font-family:'IM Fell English SC',serif;font-size:12.5px;letter-spacing:1.2px;display:block;}
+.rbhint{font-size:8px;opacity:.72;display:block;line-height:1.2;margin-top:2px;letter-spacing:.2px;}
+/* ZACHÓD — mgła, klify, deszcz */
+.regionbox.rb-zachod{background:linear-gradient(165deg,#eef3f0,#ccdcd5);border-color:#7d968c;}
+.regionbox.rb-zachod:after{background:repeating-linear-gradient(74deg,rgba(125,150,140,.30) 0 1px,transparent 1px 9px);}
+.regionbox.rb-zachod .rbname{color:#3f5a52}
+/* ŚRODEK — lasy, zielono-brunatny */
+.regionbox.rb-srodek{background:linear-gradient(165deg,#e9f0da,#c3d6a4);border-color:#6f8a4a;}
+.regionbox.rb-srodek:after{background:
+  radial-gradient(circle at 12% 88%,rgba(80,110,50,.34) 0 5px,transparent 6px),
+  radial-gradient(circle at 30% 95%,rgba(80,110,50,.28) 0 4px,transparent 5px),
+  radial-gradient(circle at 72% 92%,rgba(80,110,50,.30) 0 5px,transparent 6px),
+  radial-gradient(circle at 90% 86%,rgba(80,110,50,.26) 0 4px,transparent 5px);}
+.regionbox.rb-srodek .rbname{color:#415626}
+/* POŁUDNIE — antyk, słońce, marmur */
+.regionbox.rb-poludnie{background:linear-gradient(165deg,#fdf1d8,#eed3a4);border-color:#c08f4f;}
+.regionbox.rb-poludnie:after{background:
+  repeating-conic-gradient(from 0deg at 50% 6%,rgba(200,140,50,.26) 0deg 5deg,transparent 5deg 16deg);}
+.regionbox.rb-poludnie .rbname{color:#8a5a1c}
+/* WSCHÓD — step, mróz, szron */
+.regionbox.rb-wschod{background:linear-gradient(165deg,#eef2fb,#c6d3ea);border-color:#8090b8;}
+.regionbox.rb-wschod:after{background:
+  repeating-linear-gradient(45deg,rgba(110,130,180,.26) 0 1px,transparent 1px 12px),
+  repeating-linear-gradient(-45deg,rgba(110,130,180,.26) 0 1px,transparent 1px 12px);}
+.regionbox.rb-wschod .rbname{color:#3d4c73}
+.regionbox.setup{cursor:grab;border-style:dashed;}
+.regionbox.setup:hover{box-shadow:0 4px 14px rgba(60,45,25,.30),0 0 0 2px rgba(138,43,34,.45), inset 0 0 46px rgba(255,255,255,.28);}
+.regionbox.setup.dragging{cursor:grabbing;box-shadow:4px 12px 24px rgba(0,0,0,.42);opacity:.95;z-index:40;}
+.rbslot{position:absolute;border-radius:6px;border:1px dashed rgba(90,74,53,.28);z-index:1;}
+
 /* provinces — format karty pionowej, fill per region */
 .prov{position:absolute;width:80px;height:106px;z-index:3;cursor:default;
   background:var(--paper);border:2px solid #b7a57e;border-radius:6px;padding:5px 6px 5px;
   box-shadow:2px 3px 0 rgba(60,45,25,.24), inset 0 0 24px rgba(120,90,50,.10);
   transform:rotate(var(--rot,0deg));transition:box-shadow .12s,transform .12s;
   display:flex;flex-direction:column;}
-.prov.r-zachod{background:#e6ecd6;border-color:#8f9d64}
-.prov.r-srodek{background:#d9e3ec;border-color:#7a94a4}
-.prov.r-poludnie{background:#f0dcc2;border-color:#c0905f}
-.prov.r-wschod{background:#e7dcea;border-color:#977ba4}
+.prov.r-zachod{background:#f4f8f6;border-color:#7d968c}
+.prov.r-srodek{background:#f2f7e8;border-color:#6f8a4a}
+.prov.r-poludnie{background:#fdf4e2;border-color:#c0905f}
+.prov.r-wschod{background:#f3f7fd;border-color:#8090b8}
 .prov .rband{height:5px;border-radius:3px;margin:-1px -2px 4px;box-shadow:inset 0 -1px 2px rgba(0,0,0,.15)}
-.prov.r-zachod .rband{background:#8f9d64}
-.prov.r-srodek .rband{background:#7a94a4}
+.prov.r-zachod .rband{background:#7d968c}
+.prov.r-srodek .rband{background:#6f8a4a}
 .prov.r-poludnie .rband{background:#c0905f}
-.prov.r-wschod .rband{background:#977ba4}
+.prov.r-wschod .rband{background:#8090b8}
 .prov:before{content:"";position:absolute;inset:0;border-radius:5px;pointer-events:none;
   background:linear-gradient(135deg,rgba(255,255,255,.28),transparent 42%);}
 .prov .pname{font-family:'IM Fell English SC',serif;font-size:12px;letter-spacing:.2px;line-height:1;margin-bottom:1px;}
@@ -57,8 +93,6 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:'Special Elite',serif
   clip-path:polygon(0 0,100% 0,100% 78%,50% 100%,0 78%);box-shadow:1px 1px 0 rgba(0,0,0,.3);}
 .prov .banner:after{content:"";position:absolute;left:6px;top:-8px;width:2px;height:8px;background:#5a4a35;}
 .prov .spoil{position:absolute;top:2px;right:4px;font-size:10px;color:#7a2b22;transform:rotate(-8deg);}
-.region-tag{position:absolute;font-family:'IM Fell English SC',serif;font-size:12px;color:#6b5a3d;
-  opacity:.55;z-index:2;pointer-events:none;letter-spacing:1px;text-transform:uppercase;}
 
 /* armies */
 .army{position:absolute;z-index:6;width:54px;cursor:grab;user-select:none;
@@ -256,9 +290,7 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:'Special Elite',serif
 .fx-float{position:fixed;z-index:305;pointer-events:none;font-family:'IM Fell English SC';font-size:19px;font-weight:bold;color:#b8860b;text-shadow:0 1px 3px rgba(0,0,0,.5),0 0 6px rgba(255,235,180,.6);transform:translate(-50%,-50%);animation:fxfloat 1.4s ease-out forwards}
 #setupbar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:130;background:rgba(43,33,23,.96);color:#f2e2c0;padding:9px 14px;border-radius:9px;display:flex;gap:9px;align-items:center;font-size:12.5px;box-shadow:0 5px 16px rgba(0,0,0,.45);max-width:94vw;flex-wrap:wrap;font-family:'Special Elite'}
 #setupbar b{color:#e6c86a}
-.prov.setup{cursor:grab;outline:2px dashed #b7a57e;outline-offset:2px}
-.prov.setup:hover{outline-color:#8a2b22}
-.prov.setup.dragging{cursor:grabbing;box-shadow:3px 8px 16px rgba(0,0,0,.45);opacity:.93}
+.prov.setup{pointer-events:none} /* w setupie ciągniemy cały blok regionu, nie pojedynczą kartę */
 @keyframes fxfloat{0%{opacity:0;transform:translate(-50%,-40%) scale(.5)}18%{opacity:1;transform:translate(-50%,-95%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-270%) scale(1)}}
 </style>
 
@@ -279,35 +311,38 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:'Special Elite',serif
 <script>
 "use strict";
 /* ===================== DANE ===================== */
+// Regiony = fizyczne BLOKI na stole (kontener z 4 slotami). Blok przesuwasz jako całość;
+// to, które bloki się stykają, decyduje o granicach MIĘDZY regionami. box = domyślna pozycja (%).
 const REGIONS = {
-  zachod:{name:"Europa Zachodnia", provs:["brytania","belgica","galia","hispania"], tag:[3,29]},
-  srodek:{name:"Europa Środkowa", provs:["germania","panonia","dacja","iliria"], tag:[42,1]},
-  poludnie:{name:"Europa Południowa", provs:["italia","sycylia","grecja","balkany"], tag:[42,87]},
-  wschod:{name:"Europa Wschodnia", provs:["scytia","sarmacja","mezja","tracja"], tag:[88,29]},
+  zachod:{name:"Europa Zachodnia", short:"ZACHÓD", icon:"🌫", provs:["brytania","belgica","galia","hispania"], box:[28,14]},
+  srodek:{name:"Europa Środkowa", short:"ŚRODEK", icon:"🌲", provs:["germania","panonia","dacja","iliria"], box:[43.6,14]},
+  poludnie:{name:"Europa Południowa", short:"POŁUDNIE", icon:"☀", provs:["italia","sycylia","grecja","balkany"], box:[51.4,48.9]},
+  wschod:{name:"Europa Wschodnia", short:"WSCHÓD", icon:"❄", provs:["scytia","sarmacja","mezja","tracja"], box:[59.2,14]},
 };
+const REG_HINT="4 prowincje · komplet: +1 Chwały/rundę";
+// Pozycje prowincji NIE są zapisane — wynikają ze slotu w bloku regionu (patrz syncProvPos).
+// Kolejność w REGIONS[r].provs = kolejność slotów: [lewy-górny, prawy-górny, lewy-dolny, prawy-dolny].
 const PROV = {
-  // Domyślny układ = siatka 4×4, KOLUMNA = REGION (Zachód | Środek | Południe | Wschód).
-  // Sąsiedztwo wynika z odległości: pion = w regionie, poziom = z sąsiednim regionem. Można dowolnie przestawiać w setupie.
-  // ZACHÓD (kolumna x18)
-  brytania:{name:"Brytania", region:"zachod", def:2, x:18,y:12, rot:-1.5},
-  belgica: {name:"Belgica",  region:"zachod", def:3, x:18,y:30, rot:1},
-  galia:   {name:"Galia",    region:"zachod", def:4, x:18,y:48, rot:-1},
-  hispania:{name:"Hispania", region:"zachod", def:3, x:18,y:66, rot:1.5},
-  // ŚRODEK (kolumna x39)
-  germania:{name:"Germania", region:"srodek", def:4, x:39,y:12, rot:1},
-  panonia: {name:"Panonia",  region:"srodek", def:4, x:39,y:30, rot:-1.5},
-  dacja:   {name:"Dacja",    region:"srodek", def:5, x:39,y:48, rot:1.5},
-  iliria:  {name:"Iliria",   region:"srodek", def:3, x:39,y:66, rot:-1},
-  // POŁUDNIE (kolumna x60)
-  italia:  {name:"Italia (Rzym)", region:"poludnie", def:6, x:60,y:12, rot:-1},
-  sycylia: {name:"Sycylia",  region:"poludnie", def:3, x:60,y:30, rot:1.5},
-  grecja:  {name:"Grecja",   region:"poludnie", def:4, x:60,y:48, rot:-1},
-  balkany: {name:"Bałkany",  region:"poludnie", def:4, x:60,y:66, rot:1},
-  // WSCHÓD (kolumna x81)
-  scytia:  {name:"Scytia",   region:"wschod", def:3, x:81,y:12, rot:1.5},
-  sarmacja:{name:"Sarmacja", region:"wschod", def:4, x:81,y:30, rot:-1},
-  mezja:   {name:"Mezja",    region:"wschod", def:4, x:81,y:48, rot:1},
-  tracja:  {name:"Tracja",   region:"wschod", def:5, x:81,y:66, rot:-1.5},
+  // ZACHÓD
+  brytania:{name:"Brytania", region:"zachod", def:2, rot:-1.5},
+  belgica: {name:"Belgica",  region:"zachod", def:3, rot:1},
+  galia:   {name:"Galia",    region:"zachod", def:4, rot:-1},
+  hispania:{name:"Hispania", region:"zachod", def:3, rot:1.5},
+  // ŚRODEK
+  germania:{name:"Germania", region:"srodek", def:4, rot:1},
+  panonia: {name:"Panonia",  region:"srodek", def:4, rot:-1.5},
+  dacja:   {name:"Dacja",    region:"srodek", def:5, rot:1.5},
+  iliria:  {name:"Iliria",   region:"srodek", def:3, rot:-1},
+  // POŁUDNIE
+  italia:  {name:"Italia (Rzym)", region:"poludnie", def:6, rot:-1},
+  sycylia: {name:"Sycylia",  region:"poludnie", def:3, rot:1.5},
+  grecja:  {name:"Grecja",   region:"poludnie", def:4, rot:-1},
+  balkany: {name:"Bałkany",  region:"poludnie", def:4, rot:1},
+  // WSCHÓD
+  scytia:  {name:"Scytia",   region:"wschod", def:3, rot:1.5},
+  sarmacja:{name:"Sarmacja", region:"wschod", def:4, rot:-1},
+  mezja:   {name:"Mezja",    region:"wschod", def:4, rot:1},
+  tracja:  {name:"Tracja",   region:"wschod", def:5, rot:-1.5},
 };
 const ADJ_RAW = {
   brytania:["belgica","galia"],
@@ -330,13 +365,44 @@ const ADJ_RAW = {
 const ADJ={};
 Object.keys(ADJ_RAW).forEach(a=>{ADJ[a]=new Set(ADJ_RAW[a])});
 Object.keys(ADJ_RAW).forEach(a=>ADJ_RAW[a].forEach(b=>ADJ[b].add(a)));
-// --- SĄSIEDZTWO Z UKŁADU ---  prowincje blisko siebie graniczą; graf zamrażany przy STARCIE (S.adj)
-const ADJ_THRESH=22.5; // próg sąsiedztwa w jednostkach % (odległość środków kart); niezależny od rozmiaru okna
-function provDist(a,b){ return Math.hypot(S.prov[a].px-S.prov[b].px, S.prov[a].py-S.prov[b].py); }
-function deriveAdj(){ const ps=Object.keys(PROV), g={}; ps.forEach(p=>g[p]=[]);
-  for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.length;j++){ const a=ps[i],b=ps[j]; if(provDist(a,b)<ADJ_THRESH){ g[a].push(b); g[b].push(a); } }
-  ps.forEach(a=>{ if(!g[a].length){ let best=null,bd=1e9; ps.forEach(b=>{ if(b!==a){ const d=provDist(a,b); if(d<bd){bd=d;best=b;} } }); if(best){ g[a].push(best); if(!g[best].includes(a))g[best].push(a); } } });
+/* --- GEOMETRIA BLOKU REGIONU (px; pozycja bloku w %) --- */
+const RB={pad:8, head:34, cw:80, ch:106, gx:12, gy:8};
+function rbW(){ return RB.pad*2 + RB.cw*2 + RB.gx; }              // szerokość bloku (px)
+function rbH(){ return RB.pad*2 + RB.head + RB.ch*2 + RB.gy; }    // wysokość bloku (px)
+const SLOT=[[0,0],[1,0],[0,1],[1,1]];                             // [kolumna, rząd] dla provs[0..3]
+function slotOff(i){ const [c,r]=SLOT[i];
+  return { x:(RB.pad + c*(RB.cw+RB.gx))/T.clientWidth*100, y:(RB.pad + RB.head + r*(RB.ch+RB.gy))/T.clientHeight*100 }; }
+function sdx(){ return (RB.cw+RB.gx)/T.clientWidth*100; }         // rozstaw slotów w poziomie (%)
+function sdy(){ return (RB.ch+RB.gy)/T.clientHeight*100; }        // rozstaw slotów w pionie (%)
+// pozycje prowincji = pozycja bloku + offset slotu (jedyne źródło prawdy)
+function syncProvPos(){ if(!S||!S.regPos)return;
+  for(const r in REGIONS){ const rp=S.regPos[r];
+    REGIONS[r].provs.forEach((p,i)=>{ const o=slotOff(i); S.prov[p].px=rp.x+o.x; S.prov[p].py=rp.y+o.y; }); } }
+
+/* --- SĄSIEDZTWO Z UKŁADU BLOKÓW --- (zamrażane przy STARCIE do S.adj)
+   1) wewnątrz regionu: zawsze wszyscy ze wszystkimi (region jest spójny z definicji)
+   2) między regionami: graniczą karty leżące naprzeciw siebie — czyli bloki, które się stykają
+   3) sieć bezpieczeństwa: dosklejamy rozłączne kawałki, żeby mapa zawsze była przejezdna  */
+function provDist(a,b){ return Math.hypot((S.prov[a].px-S.prov[b].px)/sdx(), (S.prov[a].py-S.prov[b].py)/sdy()); }
+function deriveAdj(){ const g={}; Object.keys(PROV).forEach(p=>g[p]=[]);
+  const add=(a,b)=>{ if(a!==b && !g[a].includes(b)){ g[a].push(b); g[b].push(a); } };
+  for(const r in REGIONS){ const ps=REGIONS[r].provs;
+    for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.length;j++) add(ps[i],ps[j]); }
+  const X=sdx(), Y=sdy(), rs=Object.keys(REGIONS);
+  for(let i=0;i<rs.length;i++)for(let j=i+1;j<rs.length;j++){
+    REGIONS[rs[i]].provs.forEach(a=>REGIONS[rs[j]].provs.forEach(b=>{
+      const dx=Math.abs(S.prov[a].px-S.prov[b].px)/X, dy=Math.abs(S.prov[a].py-S.prov[b].py)/Y;
+      if((dx<1.75&&dy<0.6)||(dy<1.85&&dx<0.6)) add(a,b); })); }
+  for(let guard=0; guard<8; guard++){ const comps=components(g); if(comps.length<2)break;
+    let best=null, bd=1e9;
+    for(let i=1;i<comps.length;i++) comps[0].forEach(a=>comps[i].forEach(b=>{ const d=provDist(a,b); if(d<bd){ bd=d; best=[a,b]; } }));
+    if(!best)break; add(best[0],best[1]); }
   return g; }
+function components(g){ const seen=new Set(), out=[];
+  for(const p in g){ if(seen.has(p))continue; const q=[p], comp=[]; seen.add(p);
+    while(q.length){ const c=q.pop(); comp.push(c); (g[c]||[]).forEach(n=>{ if(!seen.has(n)){ seen.add(n); q.push(n); } }); }
+    out.push(comp); }
+  return out; }
 function adjOf(p){ if(S&&S.adj&&S.adj[p]) return new Set(S.adj[p]); return ADJ[p]||new Set(); }
 function curAdj(){ return (S&&S.phase==="play"&&S.adj)?S.adj:deriveAdj(); }
 
@@ -632,8 +698,10 @@ let AID=1;
 const START_HAND_N=4; // ile kart na starcie dostaje każdy gracz
 function newState(player){
   S={ round:1, maxRounds:8, order:["rome","gauls","goths","vandals"], cur:0, actions:3, phase:"setup",
-      player, prov:{}, armies:[], f:{}, alliances:[], noRecruit:false, over:false, deckPos:{x:45,y:38} };
-  Object.keys(PROV).forEach(p=>S.prov[p]={owner:null, px:PROV[p].x, py:PROV[p].y});
+      player, prov:{}, armies:[], f:{}, alliances:[], noRecruit:false, over:false, deckPos:{x:80,y:26} };
+  Object.keys(PROV).forEach(p=>S.prov[p]={owner:null, px:0, py:0});
+  S.regPos={}; for(const r in REGIONS) S.regPos[r]={x:REGIONS[r].box[0], y:REGIONS[r].box[1]};
+  syncProvPos();
   for(const k in FACTIONS){ S.f[k]={name:FACTIONS[k].name, gold:3, glory:0, alive:true, deck:makeDeck(k), hand:[], dek:0, streak:0, conqThisTurn:false, diplo:"", ruler:BASIC_RULER[k], interregnum:false, rulerInArmy:null}; }
   // Faza SETUP: brak właścicieli, armii i rąk — to wszystko rozdaje beginPlay() po kliknięciu START.
 }
@@ -663,24 +731,33 @@ function resolveEvent(c,k){ const cd=CARDS[c]; talkSys(`🎲 WYDARZENIE (dobrał
 /* ===================== RENDER ===================== */
 const T=document.getElementById("table"), SVG=document.getElementById("links");
 function pxX(p){return p*T.clientWidth/100} function pxY(p){return p*T.clientHeight/100}
+// Rysujemy TYLKO granice między regionami — wewnątrz bloku sąsiedztwo jest stałe i widać je po samym bloku.
 function renderLinks(){ if(!S)return; const g=curAdj(); let seen=new Set(), lines=""; const setup=S.phase==="setup";
-  for(const a in g) for(const b of g[a]){ let key=[a,b].sort().join("-"); if(seen.has(key))continue; seen.add(key);
-    let x1=pxX(S.prov[a].px)+40,y1=pxY(S.prov[a].py)+53,x2=pxX(S.prov[b].px)+40,y2=pxY(S.prov[b].py)+53;
-    lines+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${setup?'#8a2b22':'#6b5a3d'}" stroke-width="${setup?2.5:2}" stroke-dasharray="2 5" opacity="${setup?0.65:0.4}"/>`; }
+  for(const a in g) for(const b of g[a]){ if(PROV[a].region===PROV[b].region) continue;
+    let key=[a,b].sort().join("-"); if(seen.has(key))continue; seen.add(key);
+    let x1=pxX(S.prov[a].px)+RB.cw/2, y1=pxY(S.prov[a].py)+RB.ch/2, x2=pxX(S.prov[b].px)+RB.cw/2, y2=pxY(S.prov[b].py)+RB.ch/2;
+    lines+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${setup?'#8a2b22':'#6b5a3d'}" stroke-width="${setup?3:2.5}" stroke-dasharray="${setup?'6 4':'2 5'}" opacity="${setup?0.8:0.5}"/>`; }
   SVG.innerHTML=lines; }
 function render(){
   if(!S) return;
+  syncProvPos();
   renderLinks();
   // clear provinces/armies/etc (keep svg)
-  [...T.querySelectorAll(".prov,.army,.region-tag,.totem")].forEach(e=>e.remove());
-  for(const r in REGIONS){ let d=document.createElement("div"); d.className="region-tag"; d.textContent=REGIONS[r].name.replace("Europa ","");
-    d.style.left=REGIONS[r].tag[0]+"%"; d.style.top=REGIONS[r].tag[1]+"%"; T.appendChild(d); }
+  [...T.querySelectorAll(".prov,.army,.regionbox,.totem")].forEach(e=>e.remove());
+  for(const r in REGIONS){ const R=REGIONS[r], rp=S.regPos[r];
+    let d=document.createElement("div"); d.className="regionbox rb-"+r+(S.phase==="setup"?" setup":""); d.dataset.r=r;
+    d.style.left=rp.x+"%"; d.style.top=rp.y+"%"; d.style.width=rbW()+"px"; d.style.height=rbH()+"px";
+    let slots=""; for(let i=0;i<4;i++){ const [c,ro]=SLOT[i];
+      slots+=`<div class="rbslot" style="left:${RB.pad+c*(RB.cw+RB.gx)}px;top:${RB.pad+RB.head+ro*(RB.ch+RB.gy)}px;width:${RB.cw}px;height:${RB.ch}px"></div>`; }
+    d.innerHTML=`<div class="rbhead"><span class="rbname">${R.icon} ${R.short}</span><span class="rbhint">${REG_HINT}</span></div>${slots}`;
+    if(S.phase==="setup") makeRegionDraggable(d,r);
+    T.appendChild(d); }
   for(const p in PROV){ const pr=PROV[p], o=S.prov[p].owner;
     let d=document.createElement("div"); d.className="prov r-"+pr.region+(S.phase==="setup"?" setup":""); d.dataset.p=p; d.style.left=S.prov[p].px+"%"; d.style.top=S.prov[p].py+"%"; d.style.setProperty("--rot",pr.rot+"deg");
     d.innerHTML=`<div class="rband"></div><div class="pname">${pr.name}</div><div class="rlabel">${REGIONS[pr.region].name.replace("Europa ","")}</div><div class="pmid"></div><div class="pdef">Obrona <b>${effDef(p)}</b></div>`;
     if(o){ let b=document.createElement("div"); b.className="banner"; b.style.background=FACTIONS[o].color; d.appendChild(b); }
     else if(S.prov[p].spoiled){ let sp=document.createElement("div"); sp.className="spoil"; sp.textContent="🔥"; d.appendChild(sp); }
-    if(S.phase==="setup"){ makeProvDraggable(d,p); } else { d.onclick=()=>onProv(p); }
+    if(S.phase!=="setup") d.onclick=()=>onProv(p); // w setupie karty są "przezroczyste" — ciągnie się cały blok
     T.appendChild(d);
   }
   // armies
@@ -701,20 +778,32 @@ function render(){
 }
 function cmdName(k){ return CARDS[k]?CARDS[k].n.split(" ")[0]:k }
 function positionDeck(){ const dk=document.getElementById("deck"); if(!dk||!S)return; if(S.deckPos){ dk.style.left=S.deckPos.x+"%"; dk.style.top=S.deckPos.y+"%"; } dk.style.cursor=S.phase==="setup"?"grab":"default"; }
-function makeProvDraggable(el,p){ el.style.cursor="grab";
+// przesuwa cały blok regionu (4 karty jadą razem); granice przeliczają się na żywo
+function makeRegionDraggable(el,r){
   el.addEventListener("mousedown",e=>{ if(!S||S.phase!=="setup")return; e.preventDefault(); e.stopPropagation();
-    const sx=e.clientX,sy=e.clientY,ox=S.prov[p].px,oy=S.prov[p].py; el.classList.add("dragging"); el.style.zIndex=50;
-    const mm=ev=>{ S.prov[p].px=Math.max(0,Math.min(94,ox+(ev.clientX-sx)/T.clientWidth*100)); S.prov[p].py=Math.max(0,Math.min(90,oy+(ev.clientY-sy)/T.clientHeight*100)); el.style.left=S.prov[p].px+"%"; el.style.top=S.prov[p].py+"%"; renderLinks(); };
-    const mu=()=>{ document.removeEventListener("mousemove",mm); document.removeEventListener("mouseup",mu); el.classList.remove("dragging"); el.style.zIndex=""; };
+    const sx=e.clientX, sy=e.clientY, ox=S.regPos[r].x, oy=S.regPos[r].y;
+    const maxX=100-rbW()/T.clientWidth*100, maxY=100-rbH()/T.clientHeight*100;
+    el.classList.add("dragging");
+    const mm=ev=>{ S.regPos[r].x=Math.max(0,Math.min(maxX, ox+(ev.clientX-sx)/T.clientWidth*100));
+                   S.regPos[r].y=Math.max(0,Math.min(maxY, oy+(ev.clientY-sy)/T.clientHeight*100));
+                   applyPositions(); };
+    const mu=()=>{ document.removeEventListener("mousemove",mm); document.removeEventListener("mouseup",mu); el.classList.remove("dragging"); };
     document.addEventListener("mousemove",mm); document.addEventListener("mouseup",mu); }); }
+// tanie odświeżenie pozycji (bez przebudowy DOM) — używane przy przeciąganiu i przy zmianie rozmiaru okna
+function applyPositions(){ if(!S)return; syncProvPos();
+  [...T.querySelectorAll(".regionbox")].forEach(b=>{ const rp=S.regPos[b.dataset.r]; if(rp){ b.style.left=rp.x+"%"; b.style.top=rp.y+"%"; } });
+  [...T.querySelectorAll(".prov")].forEach(d=>{ const pp=S.prov[d.dataset.p]; if(pp){ d.style.left=pp.px+"%"; d.style.top=pp.py+"%"; } });
+  [...T.querySelectorAll(".army")].forEach(d=>{ const a=S.armies.find(x=>String(x.id)===d.dataset.id); if(a){ const pp=S.prov[a.loc]; d.style.left=(pp.px+2.9)+"%"; d.style.top=(pp.py+6.5)+"%"; } });
+  renderLinks(); }
+addEventListener("resize",()=>{ if(S) applyPositions(); });
 function renderSetup(){ let bar=document.getElementById("setupbar");
   if(!S||S.phase!=="setup"){ if(bar)bar.remove(); return; }
   if(!bar){ bar=document.createElement("div"); bar.id="setupbar"; document.body.appendChild(bar); }
-  bar.innerHTML=`<span>🗺️ <b>UKŁADANIE STOŁU</b> — przeciągaj prowincje: <b>te blisko siebie graniczą</b> (czerwone linie = kto z kim sąsiaduje). Układ = mapa. Gdy gotowe:</span>
+  bar.innerHTML=`<span>🗺️ <b>UKŁADANIE STOŁU</b> — przesuwaj <b>całe regiony</b>. W regionie wszyscy graniczą ze sobą; <b>stykające się bloki</b> tworzą granice między regionami (czerwone linie). Gdy gotowe:</span>
     <button class="btn ghost" id="setupDefault">↺ Domyślny układ</button>
     <button class="btn" id="setupStart">▶ ROZPOCZNIJ GRĘ</button>`;
   bar.querySelector("#setupStart").onclick=beginPlay;
-  bar.querySelector("#setupDefault").onclick=()=>{ Object.keys(PROV).forEach(p=>{S.prov[p].px=PROV[p].x;S.prov[p].py=PROV[p].y;}); S.deckPos={x:45,y:38}; render(); }; }
+  bar.querySelector("#setupDefault").onclick=()=>{ for(const r in REGIONS) S.regPos[r]={x:REGIONS[r].box[0],y:REGIONS[r].box[1]}; S.deckPos={x:80,y:26}; render(); }; }
 function renderTop(){
   document.getElementById("rn").textContent=S.round;
   document.getElementById("rs").textContent="z "+S.maxRounds;
